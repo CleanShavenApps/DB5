@@ -922,13 +922,13 @@ static UIColor *colorWithHexString(NSString *hexString);
 		{
 			if (containingClass)
 			{
-				[[UIBarButtonItem appearanceWhenContainedIn:[UINavigationBar class], containingClass, nil]
+				[[UIBarButtonItem appearanceWhenContainedInInstancesOfClasses:@[[UINavigationBar class], containingClass]]
 				 setTitleTextAttributes:attributes
 				 forState:UIControlStateNormal];
 			}
 			else
 			{
-				[[UIBarButtonItem appearanceWhenContainedIn:[UINavigationBar class], nil]
+				[[UIBarButtonItem appearanceWhenContainedInInstancesOfClasses:@[[UINavigationBar class]]]
 				 setTitleTextAttributes:attributes
 				 forState:UIControlStateNormal];
 			}
