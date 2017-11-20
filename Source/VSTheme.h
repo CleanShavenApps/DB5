@@ -80,6 +80,9 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
 /** Where the possible values are darkcontent, lightcontent */
 - (UIStatusBarStyle)statusBarStyleForKey:(NSString *)key;
 
+/** Where the possible values are default, black */
+- (UIBarStyle)barStyleForKey:(NSString *)key;
+
 /** Where the possible values are default, dark, light */
 - (UIKeyboardAppearance)keyboardAppearanceForKey:(NSString *)key;
 
@@ -147,6 +150,7 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
 @interface VSNavigationBarSpecifier : NSObject
 
 @property (nonatomic) BOOL translucent;
+@property (nonatomic) UIBarStyle barStyle;
 @property (nonatomic, copy) UIColor *popoverBackgroundColor;
 @property (nonatomic, copy) UIColor *barColor;
 @property (nonatomic, copy) UIColor *tintColor;

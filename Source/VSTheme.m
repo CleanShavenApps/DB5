@@ -522,9 +522,13 @@ static UIColor *colorWithHexString(NSString *hexString);
 	
 	navigationBarSpecifier.buttonsLabelSpecifier = [self vs_textLabelSpecifierFromDictionary:dictionary[@"buttonsLabel"] sizeAdjustment:sizeAdjustment];
 	
-	// Always translucent by default
-	BOOL translucent = ![self vs_boolForObject:dictionary[@"disableTranslucency"]];
+	// isTranslucent by default
+	id translucentObject = dictionary[@"translucency"];
+	BOOL translucent = translucentObject ? [self vs_boolForObject:translucentObject] : YES;
 	navigationBarSpecifier.translucent = translucent;
+	
+	UIBarStyle barStyle = [self vs_barStyleFromObject:dictionary[@"barStyle"]];
+	navigationBarSpecifier.barStyle = barStyle;
 	
 	[self.navigationBarSpecifierCache setObject:navigationBarSpecifier forKey:key];
 	
@@ -731,6 +735,29 @@ static UIColor *colorWithHexString(NSString *hexString);
 	}
     
 	return UIStatusBarStyleDefault;
+}
+
+
+- (UIBarStyle)barStyleForKey:(NSString *)key {
+	
+	id obj = [self objectForKey:key];
+	return [self vs_barStyleFromObject:obj];
+}
+
+
+- (UIBarStyle)vs_barStyleFromObject:(id)obj {
+	
+	NSString *barStyleString = [self vs_stringFromObject:obj];
+	
+	if (!stringIsEmpty(barStyleString)) {
+		barStyleString = [barStyleString lowercaseString];
+		if ([barStyleString isEqualToString:@"default"])
+			return UIBarStyleDefault;
+		else if ([barStyleString isEqualToString:@"black"])
+			return UIBarStyleBlack;
+	}
+	
+	return UIBarStyleDefault;
 }
 
 
