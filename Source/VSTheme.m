@@ -1018,22 +1018,29 @@ static UIColor *colorWithHexString(NSString *hexString);
 
 - (NSAttributedString *)attributedStringWithText:(NSString *)text {
 
-	return [self attributedStringWithText:text withAlphaComponentForForegroundColor:nil];
+	return [self attributedStringWithText:text attributes:[self attributesForKeys:[self vs_defaultTextLabelAttributes]]];
 }
 
-- (NSAttributedString *)attributedStringWithText:(NSString *)text withAlphaComponentForForegroundColor:(NSNumber *)alphaComponent {
+- (NSAttributedString *)highlightedAttributedStringWithText:(NSString *)text generateMissingHighlightedColorsUsingColorsWithAlphaComponent:(NSNumber *)alphaComponent {
+
+	NSMutableDictionary *allAttributes = [[self attributesForKeys:[self vs_defaultTextLabelAttributes]] mutableCopy];
 	
-	NSDictionary *allAttributes = [self attributesForKeys:[self vs_defaultTextLabelAttributes]];
+	CGFloat alpha = alphaComponent.doubleValue;
+	if (!alphaComponent || alpha < 0 || alpha > 1) {
+		// Remove alpha component if it's invalid
+		alphaComponent = nil;
+	}
 	
-	if (alphaComponent && alphaComponent.doubleValue > 0 && alphaComponent.doubleValue < 1) {
-		UIColor *foregroundColor = allAttributes[NSForegroundColorAttributeName];
-		if (foregroundColor)
-		{
-			UIColor *modifiedForegroundColor = [foregroundColor colorWithAlphaComponent:alphaComponent.doubleValue];
-			NSMutableDictionary *modifiedAttributes = [allAttributes mutableCopy];
-			modifiedAttributes[NSForegroundColorAttributeName] = modifiedForegroundColor;
-			allAttributes = [modifiedAttributes copy];
-		}
+	if (self.highlightedColor) {
+		allAttributes[NSForegroundColorAttributeName] = self.highlightedColor;
+	} else if (alphaComponent && self.color) {
+		allAttributes[NSForegroundColorAttributeName] = [self.color colorWithAlphaComponent:alpha];
+	}
+	
+	if (self.highlightedBackgroundColor) {
+		allAttributes[NSBackgroundColorAttributeName] = self.highlightedBackgroundColor;
+	} else if (alphaComponent && self.backgroundColor) {
+		allAttributes[NSBackgroundColorAttributeName] = [self.backgroundColor colorWithAlphaComponent:alpha];
 	}
 	
 	return [self attributedStringWithText:text attributes:allAttributes];
@@ -1111,13 +1118,13 @@ static UIColor *colorWithHexString(NSString *hexString);
 	return [textAttributes copy];
 }
 
-- (void)applyToLabel:(UILabel *)label
-{
+- (void)applyToLabel:(UILabel *)label {
+	
 	[self applyToLabel:label withText:nil];
 }
 
-- (void)applyToLabel:(UILabel *)label withText:(NSString *)text
-{
+- (void)applyToLabel:(UILabel *)label withText:(NSString *)text {
+	
 	if (text)
 	{
 		label.text = [self transformText:text];
@@ -1134,6 +1141,26 @@ static UIColor *colorWithHexString(NSString *hexString);
 	
 	if (self.sizeToFit)
 		[label sizeToFit];
+}
+
+- (void)applyToButton:(UIButton *)button titleForNormalAndHighlightedState:(NSString *)title generateMissingHighlightedColorsUsingColorsWithAlphaComponent:(NSNumber *)alphaComponent {
+	
+	NSAttributedString *normalTitle = [self attributedStringWithText:title];
+	[button setAttributedTitle:normalTitle forState:UIControlStateNormal];
+	
+	NSAttributedString *highlightedTitle = [self highlightedAttributedStringWithText:title generateMissingHighlightedColorsUsingColorsWithAlphaComponent:alphaComponent];
+	[button setAttributedTitle:highlightedTitle forState:UIControlStateHighlighted];
+}
+
+- (void)applyToButton:(UIButton *)button titleForNormalAndHighlightedState:(NSString *)title {
+	
+	[self applyToButton:button titleForNormalAndHighlightedState:title generateMissingHighlightedColorsUsingColorsWithAlphaComponent:@0.5];
+}
+
+- (void)applyToButton:(UIButton *)button titleForDisabledState:(NSString *)title {
+	
+	NSAttributedString *disabledTitle = [self attributedStringWithText:title];
+	[button setAttributedTitle:disabledTitle forState:UIControlStateDisabled];
 }
 
 @end
