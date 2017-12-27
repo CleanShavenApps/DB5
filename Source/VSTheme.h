@@ -206,6 +206,11 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
  attributes dictionary and by applying any transformation to the text */
 - (NSAttributedString *)attributedStringWithText:(NSString *)text;
 
+/** Returns an attributed string with attributes specified in the receiver's
+ attributes dictionary and by applying any transformation to the text, with the
+ option to modifed the alpha component of the foreground color */
+- (NSAttributedString *)attributedStringWithText:(NSString *)text withAlphaComponentForForegroundColor:(NSNumber *)alphaComponent;
+
 /** Returns an attributed string with attributes specified in the attributes
  dictionary and by applying any transformation to the text */
 - (NSAttributedString *)attributedStringWithText:(NSString *)text attributes:(NSDictionary *)attributes;

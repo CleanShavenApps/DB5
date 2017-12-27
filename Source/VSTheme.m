@@ -1012,10 +1012,30 @@ static UIColor *colorWithHexString(NSString *hexString);
 	return transformedText;
 }
 
+- (NSArray *)vs_defaultTextLabelAttributes {
+	return @[NSFontAttributeName, NSForegroundColorAttributeName, NSBackgroundColorAttributeName, NSParagraphStyleAttributeName];
+}
+
 - (NSAttributedString *)attributedStringWithText:(NSString *)text {
 
-	NSDictionary *allAttributes = [self attributesForKeys:@[NSFontAttributeName, NSForegroundColorAttributeName, NSBackgroundColorAttributeName, NSParagraphStyleAttributeName]];
+	return [self attributedStringWithText:text withAlphaComponentForForegroundColor:nil];
+}
 
+- (NSAttributedString *)attributedStringWithText:(NSString *)text withAlphaComponentForForegroundColor:(NSNumber *)alphaComponent {
+	
+	NSDictionary *allAttributes = [self attributesForKeys:[self vs_defaultTextLabelAttributes]];
+	
+	if (alphaComponent && alphaComponent.doubleValue > 0 && alphaComponent.doubleValue < 1) {
+		UIColor *foregroundColor = allAttributes[NSForegroundColorAttributeName];
+		if (foregroundColor)
+		{
+			UIColor *modifiedForegroundColor = [foregroundColor colorWithAlphaComponent:alphaComponent.doubleValue];
+			NSMutableDictionary *modifiedAttributes = [allAttributes mutableCopy];
+			modifiedAttributes[NSForegroundColorAttributeName] = modifiedForegroundColor;
+			allAttributes = [modifiedAttributes copy];
+		}
+	}
+	
 	return [self attributedStringWithText:text attributes:allAttributes];
 }
 
