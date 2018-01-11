@@ -738,6 +738,35 @@ static UIColor *colorWithHexString(NSString *hexString);
 }
 
 
+- (UIBlurEffectStyle)blurEffectStyleForKey:(NSString *)key {
+	
+	id obj = [self objectForKey:key];
+	return [self vs_blurEffectStyleFromObject:obj];
+}
+
+
+- (UIBlurEffectStyle)vs_blurEffectStyleFromObject:(id)obj {
+	
+	NSString *statusBarStyleString = [self vs_stringFromObject:obj];
+	
+	if (!stringIsEmpty(statusBarStyleString)) {
+		statusBarStyleString = [statusBarStyleString lowercaseString];
+		if ([statusBarStyleString isEqualToString:@"extralight"])
+			return UIBlurEffectStyleExtraLight;
+		else if ([statusBarStyleString isEqualToString:@"light"])
+			return UIBlurEffectStyleLight;
+		else if ([statusBarStyleString isEqualToString:@"dark"])
+			return UIBlurEffectStyleDark;
+		else if ([statusBarStyleString isEqualToString:@"regular"])
+			return UIBlurEffectStyleRegular;
+		else if ([statusBarStyleString isEqualToString:@"prominent"])
+			return UIBlurEffectStyleProminent;
+	}
+	
+	return UIBlurEffectStyleExtraLight;
+}
+
+
 - (UIBarStyle)barStyleForKey:(NSString *)key {
 	
 	id obj = [self objectForKey:key];
