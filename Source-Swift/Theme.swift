@@ -862,28 +862,39 @@ class TextLabelSpecifier {
 	}()
 	
     func attributedString(withText text: String) -> NSAttributedString {
-        return self.attributedString(withText: text, alphaComponentForForegroundColor: nil)
+		return self.attributedString(withText: text, attributes: attributes(forKeys: defaultTextLabelAttribute))
     }
 	
-	/// Returns an attributed string with attributes specified in the receiver's
-	/// attributes dictionary and by applying any transformation to the text,
-	/// with the option to modifed the alpha component of the foreground color
+	/// Returns a highlighted attributed string for use in the attributed title
+	/// of the highlighted state of a UIButton, using attributes specified in
+	/// the receiver's attributes dictionary, and by applying any transformatio
+	/// to the text.
 	///
 	/// - Parameters:
-	///   - text: The text to be used to generate the attributed string
-	///   - alphaComponentForForegroundColor: The modified alpha value for the
-	///		foreground color
-	func attributedString(withText text: String, alphaComponentForForegroundColor: CGFloat?) -> NSAttributedString {
+	///   - text: The text to use for the attributed string
+	///   - alphaComponent: If the specifier is missing highlightedColor or
+	/// highlightedBackgroundColor, specify a opacity from 0–1 to automatically
+	/// generate the highlightedColor and highlightedBackgroundColor based on
+	/// the color and backgroundColor
+	/// - Returns: An attributed string meant for the highlighted state of a UIButton
+	func highlightedAttributedString(withText text: String, generateMissingHighlightedColorsUsingColorsWithAlphaComponent alphaComponent: CGFloat?) -> NSAttributedString {
 		var allAttributes = attributes(forKeys: defaultTextLabelAttribute)
 		
-		guard let alpha = alphaComponentForForegroundColor,
-			alpha > 0 && alpha < 1,
-			let foregroundColor = allAttributes[.foregroundColor] as? UIColor else {
-			return attributedString(withText: text, attributes: allAttributes)
+		let kMinimumAlpha: CGFloat = 0
+		let kMaximumAlpha: CGFloat = 1
+		
+		if let highlightedColor = self.highlightedColor {
+			allAttributes[.foregroundColor] = highlightedColor
+		} else if let color = self.color, let alpha = alphaComponent, alpha > kMinimumAlpha && alpha < kMaximumAlpha {
+			allAttributes[.foregroundColor] = color.withAlphaComponent(alpha)
 		}
 		
-		let modifiedForegroundColor = foregroundColor.withAlphaComponent(alpha)
-		allAttributes[.foregroundColor] = modifiedForegroundColor
+		if let highlightedBackgroundColor = self.highlightedBackgroundColor {
+			allAttributes[.backgroundColor] = highlightedBackgroundColor;
+		} else if let backgroundColor = self.backgroundColor, let alpha = alphaComponent, alpha > kMinimumAlpha && alpha < kMaximumAlpha {
+			allAttributes[.backgroundColor] = backgroundColor.withAlphaComponent(alpha)
+		}
+
 		return attributedString(withText: text, attributes: allAttributes)
 	}
 
@@ -969,6 +980,20 @@ class TextLabelSpecifier {
             label.sizeToFit()
         }
     }
+
+	func apply(toButton button: UIButton, titleForNormalAndHighlightedState title: String, generateMissingHighlightedColorsUsingColorsWithAlphaComponent alphaComponent: CGFloat? = 0.5) {
+		let normalTitle = attributedString(withText: title)
+		button.setAttributedTitle(normalTitle, for: .normal)
+		
+		let highlightedTitle = highlightedAttributedString(withText: title, generateMissingHighlightedColorsUsingColorsWithAlphaComponent: alphaComponent)
+		button.setAttributedTitle(highlightedTitle, for: .highlighted)
+	}
+	
+	func apply(toButton button: UIButton, titleForDisabledState title: String) {
+		let disabledTitle = self.attributedString(withText: title)
+		button.setAttributedTitle(disabledTitle, for: .disabled)
+	}
+
 }
 
 class DashedBorderSpecifier {
