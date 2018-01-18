@@ -18,7 +18,7 @@ func stringIsEmpty(s: String?) -> Bool {
     guard let s = s else {
         return true
     }
-    return s.characters.count == 0
+    return s.count == 0
 }
 
 // Picky. Crashes by design.
@@ -32,7 +32,7 @@ func colorWithHexString(hexString: String?) -> UIColor {
     }
 
     let s: NSMutableString = NSMutableString(string: hexString)
-    s.replaceOccurrences(of: "#", with: "", options: NSString.CompareOptions.caseInsensitive, range: NSMakeRange(0, hexString.characters.count))
+    s.replaceOccurrences(of: "#", with: "", options: NSString.CompareOptions.caseInsensitive, range: NSMakeRange(0, hexString.count))
     CFStringTrimWhitespace(s)
     let redString = s.substring(to: 2)
     let greenString = s.substring(with: NSMakeRange(2, 2))
@@ -517,10 +517,10 @@ class Theme: Equatable {
         labelSpecifier.padding = self.edgeInsets(fromDictionary: edgeInsetsDictionary)
         
         let allAttributes = [
-            NSFontAttributeName,
-            NSForegroundColorAttributeName,
-            NSBackgroundColorAttributeName,
-            NSParagraphStyleAttributeName]
+			NSAttributedStringKey.font,
+			NSAttributedStringKey.foregroundColor,
+			NSAttributedStringKey.backgroundColor,
+			NSAttributedStringKey.paragraphStyle]
         labelSpecifier.attributes = labelSpecifier.attributes(forKeys: allAttributes)
         return labelSpecifier
     }
@@ -750,15 +750,15 @@ class NavigationBarSpecifier {
         
         if let titleLabelSpecifier = self.titleLabelSpecifier {
             let attributes = titleLabelSpecifier.attributes(forKeys: [
-                NSFontAttributeName,
-                NSForegroundColorAttributeName])
+                NSAttributedStringKey.font,
+                NSAttributedStringKey.foregroundColor])
             navigationBar.titleTextAttributes = attributes
         }
         
         if let buttonsLabelSpecifier = self.buttonsLabelSpecifier {
             let attributes = buttonsLabelSpecifier.attributes(forKeys: [
-                NSFontAttributeName,
-                NSForegroundColorAttributeName])
+				NSAttributedStringKey.font,
+				NSAttributedStringKey.foregroundColor])
             if let containingClass = containingClass {
                 UIBarButtonItem.appearance(whenContainedInInstancesOf: [UINavigationBar.self, containingClass]).setTitleTextAttributes(attributes, for: .normal)
             }
@@ -799,7 +799,7 @@ class TextLabelSpecifier {
     var padding: UIEdgeInsets?
     
     /** Attributes representing the font, color, backgroundColor, alignment and lineBreakMode */
-    var attributes: [String: Any]?
+    var attributes: [NSAttributedStringKey: Any]?
     
     func label(withText text: String) -> UILabel {
         let frame = CGRect(origin: self.position, size: self.size)
@@ -830,29 +830,29 @@ class TextLabelSpecifier {
     
     func attributedString(withText text: String) -> NSAttributedString {
         let allAttributes = self.attributes(forKeys: [
-            NSFontAttributeName,
-            NSForegroundColorAttributeName,
-            NSBackgroundColorAttributeName,
-            NSParagraphStyleAttributeName])
+			NSAttributedStringKey.font,
+			NSAttributedStringKey.foregroundColor,
+			NSAttributedStringKey.backgroundColor,
+			NSAttributedStringKey.paragraphStyle])
         return self.attributedString(withText: text, attributes: allAttributes)
     }
     
-    func attributedString(withText text: String, attributes: [String: Any]) -> NSAttributedString {
+    func attributedString(withText text: String, attributes: [NSAttributedStringKey: Any]) -> NSAttributedString {
         let transformedText = self.transform(text: text)
         return NSAttributedString(string: transformedText, attributes: attributes)
     }
     
-    func fontAndColorAttributes() -> [String: Any] {
+    func fontAndColorAttributes() -> [NSAttributedStringKey: Any] {
         return self.attributes(forKeys: [
-            NSFontAttributeName,
-            NSForegroundColorAttributeName,
-            NSBackgroundColorAttributeName])
+            NSAttributedStringKey.font,
+            NSAttributedStringKey.foregroundColor,
+            NSAttributedStringKey.backgroundColor])
     }
     
-    func attributes(forKeys keys: [String]) -> [String: Any] {
-        var textAttributes: [String: Any] = [:]
+    func attributes(forKeys keys: [NSAttributedStringKey]) -> [NSAttributedStringKey: Any] {
+        var textAttributes: [NSAttributedStringKey: Any] = [:]
         for key in keys {
-            if key == NSParagraphStyleAttributeName {
+            if key == NSAttributedStringKey.paragraphStyle {
                 if let paragraphStyle = NSMutableParagraphStyle.default.mutableCopy() as? NSMutableParagraphStyle {
                     
                     paragraphStyle.lineBreakMode = self.lineBreakMode
@@ -873,17 +873,17 @@ class TextLabelSpecifier {
                     textAttributes[key] = paragraphStyle
                 }
             }
-            else if key == NSFontAttributeName {
+            else if key == NSAttributedStringKey.font {
                 if let font = self.font {
                     textAttributes[key] = font
                 }
             }
-            else if key == NSForegroundColorAttributeName {
+            else if key == NSAttributedStringKey.foregroundColor {
                 if let color = self.color {
                     textAttributes[key] = color
                 }
             }
-            else if key == NSBackgroundColorAttributeName {
+            else if key == NSAttributedStringKey.backgroundColor {
                 if let backgroundColor = self.backgroundColor {
                     textAttributes[key] = backgroundColor
                 }
