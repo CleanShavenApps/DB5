@@ -609,7 +609,7 @@ class Theme: Equatable {
     
     func statusBarStyle(forKey key: String) -> UIStatusBarStyle {
         let obj = self.object(forKey: key)
-        return self.statusBarStyle(fromObject: obj)
+        return statusBarStyle(fromObject: obj)
     }
     
     private func statusBarStyle(fromObject object: Any?) -> UIStatusBarStyle {
@@ -626,6 +626,33 @@ class Theme: Equatable {
 			return .default
 		}
     }
+	
+	/** Where the possible values are extralight, light, dark, regular, prominent */
+	func blueEffectStyle(forKey key: String) -> UIBlurEffectStyle {
+		let obj = self.object(forKey: key)
+		return blurEffectStyle(fromObject: obj)
+	}
+	
+	private func blurEffectStyle(fromObject object: Any?) -> UIBlurEffectStyle {
+		guard let blurEffectStyleString = self.string(fromObject: object)?.lowercased(), stringIsEmpty(s: blurEffectStyleString) == false else {
+			return .extraLight
+		}
+		
+		switch blurEffectStyleString {
+		case "extralight":
+			return .extraLight
+		case "light":
+			return .light
+		case "dark":
+			return .dark
+		case "regular":
+			return .regular
+		case "prominent":
+			return .prominent
+		default:
+			return .extraLight
+		}
+	}
 	
 	func barStyle(forKey key: String) -> UIBarStyle {
 		let obj = self.object(forKey: key)
