@@ -522,9 +522,13 @@ static UIColor *colorWithHexString(NSString *hexString);
 	
 	navigationBarSpecifier.buttonsLabelSpecifier = [self vs_textLabelSpecifierFromDictionary:dictionary[@"buttonsLabel"] sizeAdjustment:sizeAdjustment];
 	
-	// Always translucent by default
-	BOOL translucent = ![self vs_boolForObject:dictionary[@"disableTranslucency"]];
+	// isTranslucent by default
+	id translucentObject = dictionary[@"translucency"];
+	BOOL translucent = translucentObject ? [self vs_boolForObject:translucentObject] : YES;
 	navigationBarSpecifier.translucent = translucent;
+	
+	UIBarStyle barStyle = [self vs_barStyleFromObject:dictionary[@"barStyle"]];
+	navigationBarSpecifier.barStyle = barStyle;
 	
 	[self.navigationBarSpecifierCache setObject:navigationBarSpecifier forKey:key];
 	
@@ -734,6 +738,58 @@ static UIColor *colorWithHexString(NSString *hexString);
 }
 
 
+- (UIBlurEffectStyle)blurEffectStyleForKey:(NSString *)key {
+	
+	id obj = [self objectForKey:key];
+	return [self vs_blurEffectStyleFromObject:obj];
+}
+
+
+- (UIBlurEffectStyle)vs_blurEffectStyleFromObject:(id)obj {
+	
+	NSString *statusBarStyleString = [self vs_stringFromObject:obj];
+	
+	if (!stringIsEmpty(statusBarStyleString)) {
+		statusBarStyleString = [statusBarStyleString lowercaseString];
+		if ([statusBarStyleString isEqualToString:@"extralight"])
+			return UIBlurEffectStyleExtraLight;
+		else if ([statusBarStyleString isEqualToString:@"light"])
+			return UIBlurEffectStyleLight;
+		else if ([statusBarStyleString isEqualToString:@"dark"])
+			return UIBlurEffectStyleDark;
+		else if ([statusBarStyleString isEqualToString:@"regular"])
+			return UIBlurEffectStyleRegular;
+		else if ([statusBarStyleString isEqualToString:@"prominent"])
+			return UIBlurEffectStyleProminent;
+	}
+	
+	return UIBlurEffectStyleExtraLight;
+}
+
+
+- (UIBarStyle)barStyleForKey:(NSString *)key {
+	
+	id obj = [self objectForKey:key];
+	return [self vs_barStyleFromObject:obj];
+}
+
+
+- (UIBarStyle)vs_barStyleFromObject:(id)obj {
+	
+	NSString *barStyleString = [self vs_stringFromObject:obj];
+	
+	if (!stringIsEmpty(barStyleString)) {
+		barStyleString = [barStyleString lowercaseString];
+		if ([barStyleString isEqualToString:@"default"])
+			return UIBarStyleDefault;
+		else if ([barStyleString isEqualToString:@"black"])
+			return UIBarStyleBlack;
+	}
+	
+	return UIBarStyleDefault;
+}
+
+
 - (UIKeyboardAppearance)keyboardAppearanceForKey:(NSString *)key {
 	
 	id obj = [self objectForKey:key];
@@ -922,13 +978,13 @@ static UIColor *colorWithHexString(NSString *hexString);
 		{
 			if (containingClass)
 			{
-				[[UIBarButtonItem appearanceWhenContainedIn:[UINavigationBar class], containingClass, nil]
+				[[UIBarButtonItem appearanceWhenContainedInInstancesOfClasses:@[[UINavigationBar class], containingClass]]
 				 setTitleTextAttributes:attributes
 				 forState:UIControlStateNormal];
 			}
 			else
 			{
-				[[UIBarButtonItem appearanceWhenContainedIn:[UINavigationBar class], nil]
+				[[UIBarButtonItem appearanceWhenContainedInInstancesOfClasses:@[[UINavigationBar class]]]
 				 setTitleTextAttributes:attributes
 				 forState:UIControlStateNormal];
 			}
@@ -985,10 +1041,37 @@ static UIColor *colorWithHexString(NSString *hexString);
 	return transformedText;
 }
 
+- (NSArray *)vs_defaultTextLabelAttributes {
+	return @[NSFontAttributeName, NSForegroundColorAttributeName, NSBackgroundColorAttributeName, NSParagraphStyleAttributeName];
+}
+
 - (NSAttributedString *)attributedStringWithText:(NSString *)text {
 
-	NSDictionary *allAttributes = [self attributesForKeys:@[NSFontAttributeName, NSForegroundColorAttributeName, NSBackgroundColorAttributeName, NSParagraphStyleAttributeName]];
+	return [self attributedStringWithText:text attributes:[self attributesForKeys:[self vs_defaultTextLabelAttributes]]];
+}
 
+- (NSAttributedString *)highlightedAttributedStringWithText:(NSString *)text generateMissingHighlightedColorsUsingColorsWithAlphaComponent:(NSNumber *)alphaComponent {
+
+	NSMutableDictionary *allAttributes = [[self attributesForKeys:[self vs_defaultTextLabelAttributes]] mutableCopy];
+	
+	CGFloat alpha = alphaComponent.doubleValue;
+	if (!alphaComponent || alpha < 0 || alpha > 1) {
+		// Remove alpha component if it's invalid
+		alphaComponent = nil;
+	}
+	
+	if (self.highlightedColor) {
+		allAttributes[NSForegroundColorAttributeName] = self.highlightedColor;
+	} else if (alphaComponent && self.color) {
+		allAttributes[NSForegroundColorAttributeName] = [self.color colorWithAlphaComponent:alpha];
+	}
+	
+	if (self.highlightedBackgroundColor) {
+		allAttributes[NSBackgroundColorAttributeName] = self.highlightedBackgroundColor;
+	} else if (alphaComponent && self.backgroundColor) {
+		allAttributes[NSBackgroundColorAttributeName] = [self.backgroundColor colorWithAlphaComponent:alpha];
+	}
+	
 	return [self attributedStringWithText:text attributes:allAttributes];
 }
 
@@ -1064,13 +1147,13 @@ static UIColor *colorWithHexString(NSString *hexString);
 	return [textAttributes copy];
 }
 
-- (void)applyToLabel:(UILabel *)label
-{
+- (void)applyToLabel:(UILabel *)label {
+	
 	[self applyToLabel:label withText:nil];
 }
 
-- (void)applyToLabel:(UILabel *)label withText:(NSString *)text
-{
+- (void)applyToLabel:(UILabel *)label withText:(NSString *)text {
+	
 	if (text)
 	{
 		label.text = [self transformText:text];
@@ -1087,6 +1170,26 @@ static UIColor *colorWithHexString(NSString *hexString);
 	
 	if (self.sizeToFit)
 		[label sizeToFit];
+}
+
+- (void)applyToButton:(UIButton *)button titleForNormalAndHighlightedState:(NSString *)title generateMissingHighlightedColorsUsingColorsWithAlphaComponent:(NSNumber *)alphaComponent {
+	
+	NSAttributedString *normalTitle = [self attributedStringWithText:title];
+	[button setAttributedTitle:normalTitle forState:UIControlStateNormal];
+	
+	NSAttributedString *highlightedTitle = [self highlightedAttributedStringWithText:title generateMissingHighlightedColorsUsingColorsWithAlphaComponent:alphaComponent];
+	[button setAttributedTitle:highlightedTitle forState:UIControlStateHighlighted];
+}
+
+- (void)applyToButton:(UIButton *)button titleForNormalAndHighlightedState:(NSString *)title {
+	
+	[self applyToButton:button titleForNormalAndHighlightedState:title generateMissingHighlightedColorsUsingColorsWithAlphaComponent:@0.5];
+}
+
+- (void)applyToButton:(UIButton *)button titleForDisabledState:(NSString *)title {
+	
+	NSAttributedString *disabledTitle = [self attributedStringWithText:title];
+	[button setAttributedTitle:disabledTitle forState:UIControlStateDisabled];
 }
 
 @end

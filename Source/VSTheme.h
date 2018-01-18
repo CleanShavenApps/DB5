@@ -80,6 +80,12 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
 /** Where the possible values are darkcontent, lightcontent */
 - (UIStatusBarStyle)statusBarStyleForKey:(NSString *)key;
 
+/** Where the possible values are extralight, light, dark, regular, prominent */
+- (UIBlurEffectStyle)blurEffectStyleForKey:(NSString *)key;
+
+/** Where the possible values are default, black */
+- (UIBarStyle)barStyleForKey:(NSString *)key;
+
 /** Where the possible values are default, dark, light */
 - (UIKeyboardAppearance)keyboardAppearanceForKey:(NSString *)key;
 
@@ -147,6 +153,7 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
 @interface VSNavigationBarSpecifier : NSObject
 
 @property (nonatomic) BOOL translucent;
+@property (nonatomic) UIBarStyle barStyle;
 @property (nonatomic, copy) UIColor *popoverBackgroundColor;
 @property (nonatomic, copy) UIColor *barColor;
 @property (nonatomic, copy) UIColor *tintColor;
@@ -202,6 +209,21 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
  attributes dictionary and by applying any transformation to the text */
 - (NSAttributedString *)attributedStringWithText:(NSString *)text;
 
+/**
+ Returns a highlighted attributed string for use in the attributed title
+ of the highlighted state of a UIButton, using attributes specified in the
+ receiver's attributes dictionary, and by applying any transformation to the
+ text.
+
+ @param text The text to use for the attributed string
+ @param alphaComponent If the specifier is missing highlightedColor or
+ highlightedBackgroundColor, specify a opacity from 0–1 to automatically
+ generate the highlightedColor and highlightedBackgroundColor based on the
+ color and backgroundColor
+ @return An attributed string meant for the highlighted state of a UIButton
+ */
+- (NSAttributedString *)highlightedAttributedStringWithText:(NSString *)text generateMissingHighlightedColorsUsingColorsWithAlphaComponent:(NSNumber *)alphaComponent;
+
 /** Returns an attributed string with attributes specified in the attributes
  dictionary and by applying any transformation to the text */
 - (NSAttributedString *)attributedStringWithText:(NSString *)text attributes:(NSDictionary *)attributes;
@@ -225,6 +247,35 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
  Apply the specifier attributes to the label, setting and transforming text
  */
 - (void)applyToLabel:(UILabel *)label withText:(NSString *)text;
+
+/**
+ Apply the specifier attributes to the button the attributed title for
+ normal and highlighted state. If highlighted colors are not specified,
+ automatically generate them from the normal color attributes using the
+ specified alpha component.
+
+ @param button The button to apply the attributed title for normal and
+ highlighted states
+ @param title The text to use for the title of the button in normal and
+ highlighted states
+ @param alphaComponent If nil, does not attempt to generate missing
+ highlighted colors. It will fallback to using the normal color attributes.
+ */
+- (void)applyToButton:(UIButton *)button titleForNormalAndHighlightedState:(NSString *)title generateMissingHighlightedColorsUsingColorsWithAlphaComponent:(NSNumber *)alphaComponent;
+
+/**
+ Apply the specifier attributes to the button the attributed title for
+ normal and highlighted state. If highlighted colors are not specified,
+ automatically generate them from the normal color attributes by fading
+ them to 50% of the normal colors.
+ */
+- (void)applyToButton:(UIButton *)button titleForNormalAndHighlightedState:(NSString *)title;
+
+/**
+ Apply the specifier attributes to the button the attributed title for
+ disabled state.
+ */
+- (void)applyToButton:(UIButton *)button titleForDisabledState:(NSString *)title;
 @end
 
 
