@@ -853,16 +853,40 @@ class TextLabelSpecifier {
         }
         return transformedText
     }
-    
+	
+	private lazy var defaultTextLabelAttribute = {
+		return [NSAttributedStringKey.font,
+				NSAttributedStringKey.foregroundColor,
+				NSAttributedStringKey.backgroundColor,
+				NSAttributedStringKey.paragraphStyle]
+	}()
+	
     func attributedString(withText text: String) -> NSAttributedString {
-        let allAttributes = self.attributes(forKeys: [
-			NSAttributedStringKey.font,
-			NSAttributedStringKey.foregroundColor,
-			NSAttributedStringKey.backgroundColor,
-			NSAttributedStringKey.paragraphStyle])
-        return self.attributedString(withText: text, attributes: allAttributes)
+        return self.attributedString(withText: text, alphaComponentForForegroundColor: nil)
     }
-    
+	
+	/// Returns an attributed string with attributes specified in the receiver's
+	/// attributes dictionary and by applying any transformation to the text,
+	/// with the option to modifed the alpha component of the foreground color
+	///
+	/// - Parameters:
+	///   - text: The text to be used to generate the attributed string
+	///   - alphaComponentForForegroundColor: The modified alpha value for the
+	///		foreground color
+	func attributedString(withText text: String, alphaComponentForForegroundColor: CGFloat?) -> NSAttributedString {
+		var allAttributes = attributes(forKeys: defaultTextLabelAttribute)
+		
+		guard let alpha = alphaComponentForForegroundColor,
+			alpha > 0 && alpha < 1,
+			let foregroundColor = allAttributes[.foregroundColor] as? UIColor else {
+			return attributedString(withText: text, attributes: allAttributes)
+		}
+		
+		let modifiedForegroundColor = foregroundColor.withAlphaComponent(alpha)
+		allAttributes[.foregroundColor] = modifiedForegroundColor
+		return attributedString(withText: text, attributes: allAttributes)
+	}
+
     func attributedString(withText text: String, attributes: [NSAttributedStringKey: Any]) -> NSAttributedString {
         let transformedText = self.transform(text: text)
         return NSAttributedString(string: transformedText, attributes: attributes)
