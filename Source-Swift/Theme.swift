@@ -429,11 +429,15 @@ class Theme: Equatable {
             navigationBarSpecifier.titleLabelSpecifier = self.textLabelSpecifier(fromDictionary: dictionary["titleLabel"] as? [String : Any], sizeAdjustment: sizeAdjustment)
             
             navigationBarSpecifier.buttonsLabelSpecifier = self.textLabelSpecifier(fromDictionary: dictionary["buttonsLabel"] as? [String : Any], sizeAdjustment: sizeAdjustment)
-            
-            // always translucent by default
-            let translucent = !self.bool(forObject: dictionary["disableTranslucency"])
-            navigationBarSpecifier.translucent = translucent
-            
+			
+			// translucent by default (initializer)
+			if let translucentObject = dictionary["translucency"] {
+				navigationBarSpecifier.translucent = bool(forObject: translucentObject)
+			}
+			
+			let barStyle = self.barStyle(fromObject: dictionary["barStyle"])
+			navigationBarSpecifier.barStyle = barStyle;
+			
             self.navigationBarSpecifierCache.setObject(navigationBarSpecifier, forKey: key as NSString)
             return navigationBarSpecifier
         }
@@ -609,18 +613,39 @@ class Theme: Equatable {
     }
     
     private func statusBarStyle(fromObject object: Any?) -> UIStatusBarStyle {
-        var statusBarStyleString = self.string(fromObject: object)
-        if !stringIsEmpty(s: statusBarStyleString) {
-            statusBarStyleString = statusBarStyleString?.lowercased()
-            if statusBarStyleString == "darkcontent" {
-                return .default
-            }
-            else if statusBarStyleString == "lightcontent" {
-                return .lightContent
-            }
-        }
-        return .default
+		guard let statusBarStyleString = self.string(fromObject: object)?.lowercased(), stringIsEmpty(s: statusBarStyleString) == false else {
+			return .default
+		}
+		
+		switch statusBarStyleString {
+		case "darkcontent":
+			return .default
+		case "lightcontent":
+			return .lightContent
+		default:
+			return .default
+		}
     }
+	
+	func barStyle(forKey key: String) -> UIBarStyle {
+		let obj = self.object(forKey: key)
+		return barStyle(fromObject: obj)
+	}
+	
+	private func barStyle(fromObject object: Any?) -> UIBarStyle {
+		guard let barStyleString = string(fromObject: object)?.lowercased(), stringIsEmpty(s: barStyleString) == false else {
+			return .default
+		}
+		
+		switch barStyleString {
+		case "default":
+			return .default
+		case "black":
+			return .black
+		default:
+			return .default
+		}
+	}
     
     func keyboardAppearance(forKey key: String) -> UIKeyboardAppearance {
         let obj = self.object(forKey: key)
@@ -732,6 +757,7 @@ class ViewSpecifier {
 class NavigationBarSpecifier {
     
     var translucent: Bool = false
+	var barStyle: UIBarStyle = .default
     var popoverBackgroundColor: UIColor?
     var barColor: UIColor?
     var tintColor: UIColor?
