@@ -464,6 +464,10 @@ static UIColor *colorWithHexString(NSString *hexString);
 	if (highlightedBackgroundColorDictionary)
 		viewSpecifier.highlightedBackgroundColor = [self vs_colorFromDictionary:highlightedBackgroundColorDictionary];
 	
+	NSDictionary *disabledBackgroundColorDictionary = [self dictionaryFromObject:dictionary[@"disabledBackgroundColor"]];
+	if (disabledBackgroundColorDictionary)
+		viewSpecifier.disabledBackgroundColor = [self vs_colorFromDictionary:disabledBackgroundColorDictionary];
+
 	NSDictionary *edgeInsetsDictionary = [self dictionaryFromObject:dictionary[@"padding"]];
 	viewSpecifier.padding = [self vs_edgeInsetsFromDictionary:edgeInsetsDictionary];
 	
@@ -607,6 +611,10 @@ static UIColor *colorWithHexString(NSString *hexString);
 	if (highlightedColorDictionary)
 		labelSpecifier.highlightedColor = [self vs_colorFromDictionary:highlightedColorDictionary];
 	
+	NSDictionary *disabledColorDictionary = [self dictionaryFromObject:dictionary[@"disabledColor"]];
+	if (disabledColorDictionary)
+		labelSpecifier.disabledColor = [self vs_colorFromDictionary:disabledColorDictionary];
+	
 	NSDictionary *backgroundColorDictionary = [self dictionaryFromObject:dictionary[@"backgroundColor"]];
 	if (backgroundColorDictionary)
 		labelSpecifier.backgroundColor = [self vs_colorFromDictionary:backgroundColorDictionary];
@@ -614,6 +622,10 @@ static UIColor *colorWithHexString(NSString *hexString);
 	NSDictionary *highlightedBackgroundColorDictionary = [self dictionaryFromObject:dictionary[@"highlightedBackgroundColor"]];
 	if (highlightedBackgroundColorDictionary)
 		labelSpecifier.highlightedBackgroundColor = [self vs_colorFromDictionary:highlightedBackgroundColorDictionary];
+	
+	NSDictionary *disabledBackgroundColorDictionary = [self dictionaryFromObject:dictionary[@"disabledBackgroundColor"]];
+	if (disabledBackgroundColorDictionary)
+		labelSpecifier.disabledBackgroundColor = [self vs_colorFromDictionary:disabledBackgroundColorDictionary];
 	
 	NSDictionary *edgeInsetsDictionary = [self dictionaryFromObject:dictionary[@"padding"]];
 	labelSpecifier.padding = [self vs_edgeInsetsFromDictionary:edgeInsetsDictionary];

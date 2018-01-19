@@ -142,6 +142,7 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
 @property (nonatomic, assign) CGPoint position;
 @property (nonatomic, copy) UIColor *backgroundColor;
 @property (nonatomic, copy) UIColor *highlightedBackgroundColor;
+@property (nonatomic, copy) UIColor *disabledBackgroundColor;
 
 /** Not used when creating a view \c -viewWithViewSpecifierKey:. How padding
  affect the view to be interpreted by interested party. */
@@ -189,8 +190,10 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
 @property (nonatomic, assign) VSTextCaseTransform textTransform;
 @property (nonatomic, copy) UIColor *color;
 @property (nonatomic, copy) UIColor *highlightedColor;
+@property (nonatomic, copy) UIColor *disabledColor;
 @property (nonatomic, copy) UIColor *backgroundColor;
 @property (nonatomic, copy) UIColor *highlightedBackgroundColor;
+@property (nonatomic, copy) UIColor *disabledBackgroundColor;
 
 /** Not used when creating a view \c -labelWithText:specifierKey:sizeAdjustment:
  How padding affect the text label to be interpreted by interested party. */

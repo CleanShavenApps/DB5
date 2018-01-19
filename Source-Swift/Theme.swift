@@ -395,6 +395,10 @@ class Theme: Equatable {
         if let highlightedBackgroundColorDictionary = self.dictionary(fromObject: dictionary["highlightedBackgroundColor"]) {
             viewSpecifier.highlightedBackgroundColor = self.color(fromDictionary: highlightedBackgroundColorDictionary)
         }
+		
+		if let disabledBackgroundColorDictionary = self.dictionary(fromObject: dictionary["disabledBackgroundColor"]) {
+			viewSpecifier.disabledBackgroundColor = self.color(fromDictionary: disabledBackgroundColorDictionary)
+		}
         
         let edgeInsetsDictionary = self.dictionary(fromObject: dictionary["padding"])
         viewSpecifier.padding = self.edgeInsets(fromDictionary: edgeInsetsDictionary)
@@ -508,6 +512,10 @@ class Theme: Equatable {
         if let highlightedColorDictionary = self.dictionary(fromObject: dictionary["highlightedColor"]) {
             labelSpecifier.highlightedColor = self.color(fromDictionary: highlightedColorDictionary)
         }
+		
+		if let disabledColorDictionary = self.dictionary(fromObject: dictionary["disabledColor"]) {
+			labelSpecifier.disabledColor = self.color(fromDictionary: disabledColorDictionary)
+		}
         
         if let backgroundColorDictionary = self.dictionary(fromObject: dictionary["backgroundColor"]) {
             labelSpecifier.backgroundColor = self.color(fromDictionary: backgroundColorDictionary)
@@ -516,6 +524,10 @@ class Theme: Equatable {
         if let highlightedBackgroundColorDictionary = self.dictionary(fromObject: dictionary["highlightedBackgroundColor"]) {
             labelSpecifier.highlightedBackgroundColor = self.color(fromDictionary: highlightedBackgroundColorDictionary)
         }
+		
+		if let disabledBackgroundColorDictionary = self.dictionary(fromObject: dictionary["disabledBackgroundColor"]) {
+			labelSpecifier.disabledBackgroundColor = self.color(fromDictionary: disabledBackgroundColorDictionary)
+		}
         
         let edgeInsetsDictionary = self.dictionary(fromObject: dictionary["padding"])
         labelSpecifier.padding = self.edgeInsets(fromDictionary: edgeInsetsDictionary)
@@ -775,6 +787,7 @@ class ViewSpecifier {
     var position = CGPoint.zero
     var backgroundColor: UIColor?
     var highlightedBackgroundColor: UIColor?
+	var disabledBackgroundColor: UIColor?
     
     /** Not used when creating a view \c -viewWithViewSpecifierKey:. How padding
      affect the view to be interpreted by interested party. */
@@ -842,10 +855,14 @@ class TextLabelSpecifier {
     var alignment: NSTextAlignment = .left
     var lineBreakMode: NSLineBreakMode = .byWordWrapping
     var textTransform: TextCaseTransform = .none
-    var color: UIColor?
+	
+	var color: UIColor?
     var highlightedColor: UIColor?
+	var disabledColor: UIColor?
+	
     var backgroundColor: UIColor?
     var highlightedBackgroundColor: UIColor?
+	var disabledBackgroundColor: UIColor?
     
     /** Not used when creating a view \c -labelWithText:specifierKey:sizeAdjustment:
      How padding affect the text label to be interpreted by interested party. */
