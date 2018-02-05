@@ -792,6 +792,19 @@ class ViewSpecifier {
     /** Not used when creating a view \c -viewWithViewSpecifierKey:. How padding
      affect the view to be interpreted by interested party. */
     var padding = UIEdgeInsets.zero
+	
+	func backgroundColor(forState state: UIControlState) -> UIColor? {
+		switch state {
+		case .normal:
+			return backgroundColor
+		case .highlighted:
+			return highlightedBackgroundColor
+		case .disabled:
+			return disabledBackgroundColor
+		default:
+			return nil
+		}
+	}
 }
 
 class NavigationBarSpecifier {
@@ -898,50 +911,56 @@ class TextLabelSpecifier {
         return transformedText
     }
 	
-	private lazy var defaultTextLabelAttribute = {
+	private lazy var defaultTextLabelAttributes = {
 		return [NSAttributedStringKey.font,
 				NSAttributedStringKey.foregroundColor,
 				NSAttributedStringKey.backgroundColor,
 				NSAttributedStringKey.paragraphStyle]
 	}()
 	
-    func attributedString(withText text: String) -> NSAttributedString {
-		return self.attributedString(withText: text, attributes: attributes(forKeys: defaultTextLabelAttribute))
+	func attributedString(withText text: String, forState state: UIControlState = .normal, generateMissingColorsUsingAlphaOfNormalColors alpha: CGFloat? = nil) -> NSAttributedString {
+		
+		var customForeground: UIColor?
+		var customBackground: UIColor?
+		
+		switch state {
+		case .normal:
+			customForeground = self.color
+			customBackground = self.backgroundColor
+		case .highlighted:
+			customForeground = self.highlightedColor
+			customBackground = self.highlightedBackgroundColor
+		case .disabled:
+			customForeground = self.disabledColor
+			customBackground = self.disabledBackgroundColor
+		default:
+			// We're generating optional custom foreground or background colors.
+			// If an invalid state is provided then we just ignore it and pass
+			// no custom colors
+			break
+		}
+		
+		// Generate missing colors if necessary
+		switch state {
+		case .highlighted, .disabled:
+			if let alpha = alpha {
+				if customForeground == nil, let normalForeground = self.color {
+					customForeground = normalForeground.withAlphaComponent(alpha)
+				}
+				
+				if customBackground == nil, let normalBackground = self.backgroundColor {
+					customBackground = normalBackground.withAlphaComponent(alpha)
+				}
+			}
+		default:
+			break
+		}
+		
+		let attributes = self.attributes(forKeys: defaultTextLabelAttributes, customForegroundColor: customForeground, customBackgroundColor: customBackground)
+		
+		return self.attributedString(withText: text, attributes: attributes)
     }
 	
-	/// Returns a highlighted attributed string for use in the attributed title
-	/// of the highlighted state of a UIButton, using attributes specified in
-	/// the receiver's attributes dictionary, and by applying any transformatio
-	/// to the text.
-	///
-	/// - Parameters:
-	///   - text: The text to use for the attributed string
-	///   - alphaComponent: If the specifier is missing highlightedColor or
-	/// highlightedBackgroundColor, specify a opacity from 0–1 to automatically
-	/// generate the highlightedColor and highlightedBackgroundColor based on
-	/// the color and backgroundColor
-	/// - Returns: An attributed string meant for the highlighted state of a UIButton
-	func highlightedAttributedString(withText text: String, generateMissingHighlightedColorsUsingColorsWithAlphaComponent alphaComponent: CGFloat?) -> NSAttributedString {
-		var allAttributes = attributes(forKeys: defaultTextLabelAttribute)
-		
-		let kMinimumAlpha: CGFloat = 0
-		let kMaximumAlpha: CGFloat = 1
-		
-		if let highlightedColor = self.highlightedColor {
-			allAttributes[.foregroundColor] = highlightedColor
-		} else if let color = self.color, let alpha = alphaComponent, alpha > kMinimumAlpha && alpha < kMaximumAlpha {
-			allAttributes[.foregroundColor] = color.withAlphaComponent(alpha)
-		}
-		
-		if let highlightedBackgroundColor = self.highlightedBackgroundColor {
-			allAttributes[.backgroundColor] = highlightedBackgroundColor;
-		} else if let backgroundColor = self.backgroundColor, let alpha = alphaComponent, alpha > kMinimumAlpha && alpha < kMaximumAlpha {
-			allAttributes[.backgroundColor] = backgroundColor.withAlphaComponent(alpha)
-		}
-
-		return attributedString(withText: text, attributes: allAttributes)
-	}
-
     func attributedString(withText text: String, attributes: [NSAttributedStringKey: Any]) -> NSAttributedString {
         let transformedText = self.transform(text: text)
         return NSAttributedString(string: transformedText, attributes: attributes)
@@ -954,7 +973,7 @@ class TextLabelSpecifier {
             NSAttributedStringKey.backgroundColor])
     }
     
-    func attributes(forKeys keys: [NSAttributedStringKey]) -> [NSAttributedStringKey: Any] {
+	func attributes(forKeys keys: [NSAttributedStringKey], customForegroundColor: UIColor? = nil, customBackgroundColor: UIColor? = nil) -> [NSAttributedStringKey: Any] {
         var textAttributes: [NSAttributedStringKey: Any] = [:]
         for key in keys {
             if key == NSAttributedStringKey.paragraphStyle {
@@ -984,12 +1003,12 @@ class TextLabelSpecifier {
                 }
             }
             else if key == NSAttributedStringKey.foregroundColor {
-                if let color = self.color {
+                if let color = customForegroundColor ?? self.color {
                     textAttributes[key] = color
                 }
             }
             else if key == NSAttributedStringKey.backgroundColor {
-                if let backgroundColor = self.backgroundColor {
+                if let backgroundColor =  customBackgroundColor ?? self.backgroundColor {
                     textAttributes[key] = backgroundColor
                 }
             }
@@ -1025,11 +1044,18 @@ class TextLabelSpecifier {
         }
     }
 
+	func apply(toButton button: UIButton, title: String, states: [UIControlState]) {
+		for state in states {
+			let attributedTitle = attributedString(withText: title, forState: state)
+			button.setAttributedTitle(attributedTitle, for: state)
+		}
+	}
+	
 	func apply(toButton button: UIButton, titleForNormalAndHighlightedState title: String, generateMissingHighlightedColorsUsingColorsWithAlphaComponent alphaComponent: CGFloat? = 0.5) {
 		let normalTitle = attributedString(withText: title)
 		button.setAttributedTitle(normalTitle, for: .normal)
 		
-		let highlightedTitle = highlightedAttributedString(withText: title, generateMissingHighlightedColorsUsingColorsWithAlphaComponent: alphaComponent)
+		let highlightedTitle = attributedString(withText: title, forState: .highlighted, generateMissingColorsUsingAlphaOfNormalColors: alphaComponent)
 		button.setAttributedTitle(highlightedTitle, for: .highlighted)
 	}
 	

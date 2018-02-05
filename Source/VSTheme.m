@@ -951,13 +951,40 @@ static UIColor *colorWithHexString(NSString *hexString);
 
 @implementation VSViewSpecifier
 
+- (UIColor *)backgroundColorForState:(UIControlState)state {
+	
+	UIColor *color = nil;
+	
+	switch (state) {
+		case UIControlStateNormal: {
+			color = self.backgroundColor;
+			break;
+		}
+			
+		case UIControlStateHighlighted: {
+			color = self.highlightedBackgroundColor;
+			break;
+		}
+			
+		case UIControlStateDisabled: {
+			color = self.disabledBackgroundColor;
+			break;
+		}
+			
+		default:
+			break;
+	}
+	
+	return color;
+}
+
 @end
 
 
 @implementation VSNavigationBarSpecifier
 
-- (void)applyToNavigationBar:(UINavigationBar *)navigationBar containedInClass:(Class)containingClass
-{
+- (void)applyToNavigationBar:(UINavigationBar *)navigationBar containedInClass:(Class)containingClass {
+	
 	if (self.barColor)
 	{
 		navigationBar.barTintColor = self.barColor;
@@ -1062,29 +1089,62 @@ static UIColor *colorWithHexString(NSString *hexString);
 	return [self attributedStringWithText:text attributes:[self attributesForKeys:[self vs_defaultTextLabelAttributes]]];
 }
 
-- (NSAttributedString *)highlightedAttributedStringWithText:(NSString *)text generateMissingHighlightedColorsUsingColorsWithAlphaComponent:(NSNumber *)alphaComponent {
+- (NSAttributedString *)attributedStringWithText:(NSString *)text forState:(UIControlState)state generateMissingColorsUsingAlphaOfNormalColors:(NSNumber *)alpha {
 
-	NSMutableDictionary *allAttributes = [[self attributesForKeys:[self vs_defaultTextLabelAttributes]] mutableCopy];
+	UIColor *customForeground = nil;
+	UIColor *customBackground = nil;
 	
-	CGFloat alpha = alphaComponent.doubleValue;
-	if (!alphaComponent || alpha < 0 || alpha > 1) {
-		// Remove alpha component if it's invalid
-		alphaComponent = nil;
+	switch (state) {
+		case UIControlStateNormal: {
+			customForeground = self.color;
+			customBackground = self.backgroundColor;
+			break;
+		}
+			
+		case UIControlStateHighlighted: {
+			customForeground = self.highlightedColor;
+			customBackground = self.highlightedBackgroundColor;
+			break;
+		}
+			
+		case UIControlStateDisabled: {
+			customForeground = self.disabledColor;
+			customBackground = self.disabledBackgroundColor;
+			break;
+		}
+			
+		default: {
+			// We're generating optional custom foreground or background colors.
+			// If an invalid state is provided then we just ignore it and pass
+			// no custom colors
+			break;
+		}
 	}
 	
-	if (self.highlightedColor) {
-		allAttributes[NSForegroundColorAttributeName] = self.highlightedColor;
-	} else if (alphaComponent && self.color) {
-		allAttributes[NSForegroundColorAttributeName] = [self.color colorWithAlphaComponent:alpha];
+	// Generate missing colors if necessary
+	switch (state) {
+		case UIControlStateHighlighted:
+		case UIControlStateDisabled: {
+			if (alpha != nil) {
+				if (customForeground == nil) {
+					customForeground = [self.color colorWithAlphaComponent:alpha.doubleValue];
+				}
+				
+				if (customBackground == nil) {
+					customBackground = [self.backgroundColor colorWithAlphaComponent:alpha.doubleValue];
+				}
+			}
+			break;
+		}
+			
+		default:
+			break;
 	}
 	
-	if (self.highlightedBackgroundColor) {
-		allAttributes[NSBackgroundColorAttributeName] = self.highlightedBackgroundColor;
-	} else if (alphaComponent && self.backgroundColor) {
-		allAttributes[NSBackgroundColorAttributeName] = [self.backgroundColor colorWithAlphaComponent:alpha];
-	}
+	NSDictionary *attributes = [self attributesForKeys:[self vs_defaultTextLabelAttributes] customForegroundColor:customForeground customBackgroundColor:customBackground];
 	
-	return [self attributedStringWithText:text attributes:allAttributes];
+	return [self attributedStringWithText:text attributes:attributes];
+
 }
 
 - (NSAttributedString *)attributedStringWithText:(NSString *)text attributes:(NSDictionary *)attributes {
@@ -1100,6 +1160,11 @@ static UIColor *colorWithHexString(NSString *hexString);
 }
 
 - (NSDictionary *)attributesForKeys:(NSArray *)keys {
+	
+	return [self attributesForKeys:keys customForegroundColor:nil customBackgroundColor:nil];
+}
+
+- (NSDictionary *)attributesForKeys:(NSArray *)keys customForegroundColor:(UIColor *)customForegroundColor customBackgroundColor:(UIColor *)customBackgroundColor {
 	
 	NSMutableDictionary *textAttributes = [[NSMutableDictionary alloc] initWithCapacity:[keys count]];
 	
@@ -1140,12 +1205,16 @@ static UIColor *colorWithHexString(NSString *hexString);
 			
 		} else if ([key isEqualToString:NSForegroundColorAttributeName]) {
 			
-			if (self.color)
+			if (customForegroundColor)
+				textAttributes[key] = customForegroundColor;
+			else if (self.color)
 				textAttributes[key] = self.color;
 			
 		} else if ([key isEqualToString:NSBackgroundColorAttributeName]) {
 			
-			if (self.backgroundColor)
+			if (customBackgroundColor)
+				textAttributes[key] = customBackgroundColor;
+			else if (self.backgroundColor)
 				textAttributes[key] = self.backgroundColor;
 			
 		} else {
@@ -1184,12 +1253,18 @@ static UIColor *colorWithHexString(NSString *hexString);
 		[label sizeToFit];
 }
 
+- (void)applyToButton:(UIButton *)button title:(NSString *)title state:(UIControlState)state {
+
+	NSAttributedString *attributedTitle = [self attributedStringWithText:title forState: state generateMissingColorsUsingAlphaOfNormalColors:nil];
+	[button setAttributedTitle:attributedTitle forState:state];
+}
+
 - (void)applyToButton:(UIButton *)button titleForNormalAndHighlightedState:(NSString *)title generateMissingHighlightedColorsUsingColorsWithAlphaComponent:(NSNumber *)alphaComponent {
 	
 	NSAttributedString *normalTitle = [self attributedStringWithText:title];
 	[button setAttributedTitle:normalTitle forState:UIControlStateNormal];
 	
-	NSAttributedString *highlightedTitle = [self highlightedAttributedStringWithText:title generateMissingHighlightedColorsUsingColorsWithAlphaComponent:alphaComponent];
+	NSAttributedString *highlightedTitle = [self attributedStringWithText:title forState:UIControlStateHighlighted generateMissingColorsUsingAlphaOfNormalColors:alphaComponent];
 	[button setAttributedTitle:highlightedTitle forState:UIControlStateHighlighted];
 }
 

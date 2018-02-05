@@ -148,6 +148,8 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
  affect the view to be interpreted by interested party. */
 @property (nonatomic, assign) UIEdgeInsets padding;
 
+- (UIColor *)backgroundColorForState:(UIControlState)state;
+
 @end
 
 
@@ -212,20 +214,7 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
  attributes dictionary and by applying any transformation to the text */
 - (NSAttributedString *)attributedStringWithText:(NSString *)text;
 
-/**
- Returns a highlighted attributed string for use in the attributed title
- of the highlighted state of a UIButton, using attributes specified in the
- receiver's attributes dictionary, and by applying any transformation to the
- text.
-
- @param text The text to use for the attributed string
- @param alphaComponent If the specifier is missing highlightedColor or
- highlightedBackgroundColor, specify a opacity from 0–1 to automatically
- generate the highlightedColor and highlightedBackgroundColor based on the
- color and backgroundColor
- @return An attributed string meant for the highlighted state of a UIButton
- */
-- (NSAttributedString *)highlightedAttributedStringWithText:(NSString *)text generateMissingHighlightedColorsUsingColorsWithAlphaComponent:(NSNumber *)alphaComponent;
+- (NSAttributedString *)attributedStringWithText:(NSString *)text forState:(UIControlState)state generateMissingColorsUsingAlphaOfNormalColors:(NSNumber *)alpha;
 
 /** Returns an attributed string with attributes specified in the attributes
  dictionary and by applying any transformation to the text */
@@ -236,6 +225,8 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
  \c NSFontAttributeName, \c NSParagraphStyleAttributeName,
  \c NSForegroundColorAttributeName, \c NSBackgroundColorAttributeName */
 - (NSDictionary *)attributesForKeys:(NSArray *)keys;
+
+- (NSDictionary *)attributesForKeys:(NSArray *)keys customForegroundColor:(UIColor *)customForegroundColor customBackgroundColor:(UIColor *)customBackgroundColor;
 
 /** Convenience accessor that returns the attributes \c NSFontAttributeName,
  \c NSForegroundColorAttributeName, \c NSBackgroundColorAttributeName */
@@ -250,6 +241,20 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
  Apply the specifier attributes to the label, setting and transforming text
  */
 - (void)applyToLabel:(UILabel *)label withText:(NSString *)text;
+
+/**
+ Apply the specifier attributes to the button the attributed title for
+ the specified state. This method does not verify that the specifier
+ contains the appropriate values to generate an attributed string for
+ that state
+
+ @param button The button to apply the attributed title for normal and
+ highlighted states
+ @param title The text to use for the title of the button in normal and
+ highlighted states
+ @param state The state in which to apply the attributed title to
+ */
+- (void)applyToButton:(UIButton *)button title:(NSString *)title state:(UIControlState)state;
 
 /**
  Apply the specifier attributes to the button the attributed title for
