@@ -779,6 +779,33 @@ static UIColor *colorWithHexString(NSString *hexString);
 }
 
 
+- (UIActivityIndicatorViewStyle)activityIndicatorViewStyleForKey:(NSString *)key {
+	
+	id obj = [self objectForKey:key];
+	return [self vs_activityIndicatorViewStyleFromObject:obj];
+}
+
+
+- (UIActivityIndicatorViewStyle)vs_activityIndicatorViewStyleFromObject:(id)obj {
+	
+	NSString *styleString = [self vs_stringFromObject:obj];
+	
+	if (!stringIsEmpty(styleString)) {
+		styleString = [styleString lowercaseString];
+		if ([styleString isEqualToString:@"whitelarge"])
+			return UIActivityIndicatorViewStyleWhiteLarge;
+		else if ([styleString isEqualToString:@"white"])
+			return UIActivityIndicatorViewStyleWhite;
+		else if ([styleString isEqualToString:@"gray"])
+			return UIActivityIndicatorViewStyleGray;
+	}
+	
+	// Default: Gray
+	return UIActivityIndicatorViewStyleGray;
+}
+
+
+
 - (UIBarStyle)barStyleForKey:(NSString *)key {
 	
 	id obj = [self objectForKey:key];

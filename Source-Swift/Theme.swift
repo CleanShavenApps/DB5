@@ -666,6 +666,29 @@ class Theme: Equatable {
 		}
 	}
 	
+	/** Where the possible values are whitelarge, white, gray. Defaults to gray */
+	func activityIndicatorViewStyle(forKey key: String) -> UIActivityIndicatorViewStyle {
+		let obj = self.object(forKey: key)
+		return activityIndicatorViewStyle(fromObject: obj)
+	}
+	
+	private func activityIndicatorViewStyle(fromObject object: Any?) -> UIActivityIndicatorViewStyle {
+		guard let barStyleString = string(fromObject: object)?.lowercased(), stringIsEmpty(s: barStyleString) == false else {
+			return .gray
+		}
+		
+		switch barStyleString {
+		case "whitelarge":
+			return .whiteLarge
+		case "white":
+			return .white
+		case "gray":
+			return .gray
+		default:
+			return .gray
+		}
+	}
+	
 	func barStyle(forKey key: String) -> UIBarStyle {
 		let obj = self.object(forKey: key)
 		return barStyle(fromObject: obj)
