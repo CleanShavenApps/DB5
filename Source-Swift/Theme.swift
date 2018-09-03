@@ -495,6 +495,8 @@ class Theme: Equatable {
         labelSpecifier.paragraphSpacingMultiple = self.float(fromObject: dictionary["paragraphSpacingMultiple"])
         labelSpecifier.paragraphSpacingBefore = self.float(fromObject: dictionary["paragraphSpacingBefore"])
         labelSpecifier.paragraphSpacingBeforeMultiple = self.float(fromObject: dictionary["paragraphSpacingBeforeMultiple"])
+		
+		labelSpecifier.lineSpacingMultiple = self.float(fromObject: dictionary["lineSpacingMultiple"])
         
         let alignmentString = self.string(fromObject: dictionary["alignment"])
         labelSpecifier.alignment = self.textAlignment(fromObject: alignmentString)
@@ -887,6 +889,9 @@ class TextLabelSpecifier {
     var paragraphSpacingMultiple: Float = 0
     /// If multiple is > 0, takes precedence over paragraphSpacingBefore
     var paragraphSpacingBeforeMultiple: Float = 0
+	
+	/// Line spacing affect line breaks (\u2028), while paragraph spacing affects paragraph breaks (\u2029). The line spacing is calculated with the font.pointSize multipled by lineSpacingMultiple.
+	var lineSpacingMultiple: Float = 0
     
     var alignment: NSTextAlignment = .left
     var lineBreakMode: NSLineBreakMode = .byWordWrapping
@@ -1017,6 +1022,11 @@ class TextLabelSpecifier {
                     else if self.paragraphSpacingBefore>0 {
                         paragraphStyle.paragraphSpacing = CGFloat(paragraphSpacingBefore)
                     }
+					
+					if self.lineSpacingMultiple>0, let font = self.font {
+						paragraphStyle.lineSpacing = font.pointSize * CGFloat(self.lineSpacingMultiple)
+					}
+					
                     textAttributes[key] = paragraphStyle
                 }
             }

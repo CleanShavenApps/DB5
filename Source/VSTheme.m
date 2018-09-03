@@ -594,6 +594,8 @@ static UIColor *colorWithHexString(NSString *hexString);
 	labelSpecifier.paragraphSpacingBefore = [self vs_floatFromObject:dictionary[@"paragraphSpacingBefore"]];
 	labelSpecifier.paragraphSpacingBeforeMultiple = [self vs_floatFromObject:dictionary[@"paragraphSpacingBeforeMultiple"]];
 	
+	labelSpecifier.lineSpacingMultiple = [self vs_floatFromObject:dictionary[@"lineSpacingMultiple"]];
+	
 	NSString *alignmentString = [self vs_stringFromObject:dictionary[@"alignment"]];
 	labelSpecifier.alignment = [self vs_textAlignmentFromObject:alignmentString];
 	
@@ -1221,6 +1223,11 @@ static UIColor *colorWithHexString(NSString *hexString);
 			else if (self.paragraphSpacingBefore>0)
 			{
 				paragraphStyle.paragraphSpacingBefore = self.paragraphSpacingBefore;
+			}
+			
+			if (self.lineSpacingMultiple>0 && self.font)
+			{
+				paragraphStyle.lineSpacing = self.font.pointSize * self.lineSpacingMultiple;
 			}
 
 			textAttributes[key] = paragraphStyle;

@@ -190,6 +190,11 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
 /// If multiple is > 0, takes precedence over paragraphSpacingBefore
 @property (nonatomic, assign) CGFloat paragraphSpacingBeforeMultiple;
 
+/**
+ Line spacing affect line breaks (\u2028), while paragraph spacing affects paragraph breaks (\u2029). The line spacing is calculated with the font.pointSize multipled by lineSpacingMultiple.
+ */
+@property (nonatomic, assign) CGFloat lineSpacingMultiple;
+
 @property (nonatomic, assign) NSTextAlignment alignment;
 @property (nonatomic, assign) NSLineBreakMode lineBreakMode;
 @property (nonatomic, assign) VSTextCaseTransform textTransform;
