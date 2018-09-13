@@ -574,18 +574,22 @@ class Theme: Equatable {
         var alignmentString = self.string(fromObject: object)
         if !stringIsEmpty(s: alignmentString) {
             alignmentString = alignmentString?.lowercased()
-            if alignmentString == "left" {
-                return .left
-            }
-            else if alignmentString == "right" {
-                return .right
-            }
-            else if alignmentString == "justified" {
-                return .justified
-            }
-            else if alignmentString == "natural" {
-                return .natural
-            }
+			if let str = alignmentString {
+				switch str {
+				case "left":
+					return .left
+				case "center":
+					return .center
+				case "right":
+					return .right
+				case "justified":
+					return .justified
+				case "natural":
+					return .natural
+				default:
+					break
+				}
+			}
         }
         return .left
     }
