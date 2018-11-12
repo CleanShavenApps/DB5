@@ -8,13 +8,13 @@
 
 import UIKit
 
-enum TextCaseTransform {
+public enum TextCaseTransform {
     case none
     case upper
     case lower
 }
 
-func stringIsEmpty(s: String?) -> Bool {
+public func stringIsEmpty(s: String?) -> Bool {
     guard let s = s else {
         return true
     }
@@ -22,7 +22,7 @@ func stringIsEmpty(s: String?) -> Bool {
 }
 
 // Picky. Crashes by design.
-func colorWithHexString(hexString: String?) -> UIColor {
+public func colorWithHexString(hexString: String?) -> UIColor {
     
     guard let hexString = hexString else {
         return UIColor.black
@@ -46,47 +46,47 @@ func colorWithHexString(hexString: String?) -> UIColor {
     return UIColor(red: CGFloat(r)/255.0, green: CGFloat(g)/255.0, blue: CGFloat(b)/255.0, alpha: 1.0)
 }
 
-class Theme: Equatable {
+public class Theme: Equatable {
     
-    var name: String
-    var parentTheme: Theme?
+    public var name: String
+    public var parentTheme: Theme?
     
-    private var themeDictionary: [String: Any]
+    internal var themeDictionary: [String: Any]
     
-    init?(name: String, themeDictionary: [String: Any]) {
+    public init?(name: String, themeDictionary: [String: Any]) {
         self.name = name
         self.themeDictionary = themeDictionary
     }
     
-    static func ==(lhs: Theme, rhs: Theme) -> Bool {
+    public static func ==(lhs: Theme, rhs: Theme) -> Bool {
         return lhs.name == rhs.name
     }
     
     // MARK: Lazy Accessors for Cache
     
-    private lazy var colorCache: NSCache<NSString, UIColor> = {
+    internal lazy var colorCache: NSCache<NSString, UIColor> = {
         return NSCache()
     }()
     
-    private lazy var fontCache: NSCache<NSString, UIFont> = {
+    internal lazy var fontCache: NSCache<NSString, UIFont> = {
         return NSCache()
     }()
     
-    private lazy var viewSpecifierCache: NSCache<NSString, ViewSpecifier> = {
+    internal lazy var viewSpecifierCache: NSCache<NSString, ViewSpecifier> = {
         return NSCache()
     }()
     
-    private lazy var navigationBarSpecifierCache: NSCache<NSString, NavigationBarSpecifier> = {
+    internal lazy var navigationBarSpecifierCache: NSCache<NSString, NavigationBarSpecifier> = {
         return NSCache()
     }()
     
-    private lazy var textLabelSpecifierCache: NSCache<NSString, TextLabelSpecifier> = {
+    internal lazy var textLabelSpecifierCache: NSCache<NSString, TextLabelSpecifier> = {
         return NSCache()
     }()
     
     // MARK: Basic Methods to Obtain Data from PLIST
     
-    func object(forKey key:String) -> Any? {
+    public func object(forKey key:String) -> Any? {
         
         let themeDictionary = self.themeDictionary as NSDictionary
         var obj = themeDictionary.value(forKeyPath: key)
@@ -96,35 +96,35 @@ class Theme: Equatable {
         return obj
     }
     
-    func dictionary(forKey key: String) -> [String: Any]? {
+    public func dictionary(forKey key: String) -> [String: Any]? {
         let obj = self.object(forKey: key) as? [String: Any]
         return obj
     }
     
-    func dictionary(fromObject object:Any?) -> [String: Any]? {
+    public func dictionary(fromObject object:Any?) -> [String: Any]? {
         return object as? [String: Any]
     }
     
     // MARK: Basic Data Types
     
-    func bool(forKey key: String) -> Bool {
+    public func bool(forKey key: String) -> Bool {
         let obj = self.object(forKey: key)
         return self.bool(forObject: obj)
     }
     
-    func bool(forObject object: Any?) -> Bool {
+    public func bool(forObject object: Any?) -> Bool {
         guard let object = object as? NSNumber else {
             return false
         }
         return object.boolValue
     }
     
-    func string(forKey key: String) -> String? {
+    public func string(forKey key: String) -> String? {
         let obj = self.object(forKey: key)
         return self.string(fromObject: obj)
     }
     
-    private func string(fromObject object: Any?) -> String? {
+    internal func string(fromObject object: Any?) -> String? {
         guard let object = object else {
             return nil
         }
@@ -137,36 +137,36 @@ class Theme: Equatable {
         return nil
     }
     
-    func integer(forKey key:String) -> Int {
+    public func integer(forKey key:String) -> Int {
         let obj = self.object(forKey: key)
         return self.integer(fromObject: obj)
     }
     
-    func integer(fromObject object:Any?) -> Int {
+    public func integer(fromObject object:Any?) -> Int {
         guard let object = object as? NSNumber else {
             return 0
         }
         return object.intValue
     }
     
-    func float(forKey key:String) -> Float {
+    public func float(forKey key:String) -> Float {
         let obj = self.object(forKey: key)
         return self.float(fromObject: obj)
     }
     
-    private func float(fromObject object: Any?) -> Float {
+    internal func float(fromObject object: Any?) -> Float {
         guard let object = object as? NSNumber else {
             return 0
         }
         return object.floatValue
     }
     
-    func timeInterval(forKey key:String) -> TimeInterval {
+    public func timeInterval(forKey key:String) -> TimeInterval {
         let obj = self.object(forKey: key)
         return self.timeInterval(fromObject: obj)
     }
     
-    func timeInterval(fromObject object: Any?) -> TimeInterval {
+    public func timeInterval(fromObject object: Any?) -> TimeInterval {
         guard let object = object as? NSNumber else {
             return 0
         }
@@ -175,7 +175,7 @@ class Theme: Equatable {
     
     // MARK: Advanced Data Types
     
-    func image(forKey key:String) -> UIImage? {
+    public func image(forKey key:String) -> UIImage? {
         guard let imageName = self.string(forKey: key) else {
             return nil
         }
@@ -185,7 +185,7 @@ class Theme: Equatable {
         return UIImage(named: imageName)
     }
     
-    func color(forKey key: String) -> UIColor {
+    public func color(forKey key: String) -> UIColor {
         guard let cachedColor = self.colorCache.object(forKey: key as NSString) else {
             let colorDictionary = self.dictionary(forKey: key)
             let color = self.color(fromDictionary: colorDictionary)
@@ -195,7 +195,7 @@ class Theme: Equatable {
         return cachedColor
     }
     
-    private func color(fromDictionary dictionary: [String: Any]?) -> UIColor {
+    internal func color(fromDictionary dictionary: [String: Any]?) -> UIColor {
 
         guard let dictionary = dictionary else {
             return UIColor.black
@@ -224,19 +224,19 @@ class Theme: Equatable {
         return color!
     }
     
-    func edgeInsets(forKey key: String) -> UIEdgeInsets {
+    public func edgeInsets(forKey key: String) -> UIEdgeInsets {
         let insetsDictionary = self.dictionary(forKey: key)
         let edgeInsets = self.edgeInsets(fromDictionary: insetsDictionary)
         return edgeInsets
     }
     
-    private func edgeInsets(fromDictionary dictionary: [String: Any]?) -> UIEdgeInsets {
+    internal func edgeInsets(fromDictionary dictionary: [String: Any]?) -> UIEdgeInsets {
         let left = CGFloat(self.float(fromObject: dictionary?["left"]))
         let top = CGFloat(self.float(fromObject: dictionary?["top"]))
         let right = CGFloat(self.float(fromObject: dictionary?["right"]))
         let bottom = CGFloat(self.float(fromObject: dictionary?["bottom"]))
         
-        let edgeInsets = UIEdgeInsetsMake(top, left, bottom, right)
+        let edgeInsets = UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
         return edgeInsets
     }
     
@@ -244,7 +244,7 @@ class Theme: Equatable {
 //    }
 
     
-    func font(forKey key:String, sizeAdjustment: Float) -> UIFont {
+    public func font(forKey key:String, sizeAdjustment: Float) -> UIFont {
         let cacheKey = key.appendingFormat("_%.2f", sizeAdjustment)
         guard let cachedFont = self.fontCache.object(forKey: cacheKey as NSString) else {
             let fontDictionary = self.dictionary(forKey: key)
@@ -253,11 +253,9 @@ class Theme: Equatable {
             return font
         }
         return cachedFont
-        
-        
     }
     
-    private func font(fromDictionary dictionary: [String: Any]?, sizeAdjustment: Float) -> UIFont {
+    internal func font(fromDictionary dictionary: [String: Any]?, sizeAdjustment: Float) -> UIFont {
         let fontName = self.string(fromObject: dictionary?["name"])
         var fontSize = CGFloat(self.float(fromObject: dictionary?["size"]))
         
@@ -283,74 +281,36 @@ class Theme: Equatable {
         return font!
     }
     
-    func point(forKey key: String) -> CGPoint {
+    public func point(forKey key: String) -> CGPoint {
         let dictionary = self.dictionary(forKey: key)
         return self.point(fromDictionary: dictionary)
     }
     
-    private func point(fromDictionary dictionary: [String: Any]?) -> CGPoint {
+    internal func point(fromDictionary dictionary: [String: Any]?) -> CGPoint {
         let x = CGFloat(self.float(fromObject: dictionary?["x"]))
         let y = CGFloat(self.float(fromObject: dictionary?["y"]))
         let point = CGPoint(x: x, y: y)
         return point
     }
     
-    func size(forKey key: String) -> CGSize {
+    public func size(forKey key: String) -> CGSize {
         let dictionary = self.dictionary(forKey: key)
         return self.size(fromDictionary: dictionary)
     }
     
-    private func size(fromDictionary dictionary: [String: Any]?) -> CGSize {
+    internal func size(fromDictionary dictionary: [String: Any]?) -> CGSize {
         let width = CGFloat(self.float(fromObject: dictionary?["width"]))
         let height = CGFloat(self.float(fromObject: dictionary?["height"]))
         let size = CGSize(width: width, height: height)
         return size
     }
-    
-    private func curve(fromObject object: Any?) -> UIViewAnimationOptions {
-        guard let curveString = self.string(fromObject: object) else {
-            return .curveEaseInOut
-        }
-        if stringIsEmpty(s: curveString) {
-            return .curveEaseInOut
-        }
-        
-        let lCurveString = curveString.lowercased()
-        if lCurveString == "easeinout" {
-            return .curveEaseInOut
-        }
-        else if lCurveString == "easeout" {
-            return .curveEaseOut
-        }
-        else if lCurveString == "easein" {
-            return .curveEaseIn
-        }
-        else if lCurveString == "linear" {
-            return .curveLinear
-        }
-        return .curveEaseInOut
-    }
-    
-    func animationSpecifier(forKey key: String) -> AnimationSpecifier? {
-        let animationSpecifier = AnimationSpecifier()
-        
-        guard let animationDictionary = self.dictionary(forKey: key) else {
-            return nil
-        }
-        
-        animationSpecifier.duration = self.timeInterval(fromObject: animationDictionary["duration"])
-        animationSpecifier.delay = self.timeInterval(fromObject: animationDictionary["delay"])
-        animationSpecifier.curve = self.curve(fromObject: animationDictionary["curve"])
-        
-        return animationSpecifier
-    }
-    
+
     func textCaseTransform(forKey key: String) -> TextCaseTransform {
         let s = self.string(forKey: key)
         return self.textCaseTransform(fromString: s)
     }
     
-    private func textCaseTransform(fromString string: String?) -> TextCaseTransform {
+    internal func textCaseTransform(fromString string: String?) -> TextCaseTransform {
         guard let string = string else {
             return .none
         }
@@ -363,7 +323,7 @@ class Theme: Equatable {
         return .none
     }
     
-    func viewSpecifier(forKey key: String) -> ViewSpecifier? {
+    public func viewSpecifier(forKey key: String) -> ViewSpecifier? {
         guard let cachedSpecifier = self.viewSpecifierCache.object(forKey: key as NSString) else {
             let dictionary = self.dictionary(forKey: key)
             let viewSpecifier = self.viewSpecifier(fromDictionary: dictionary)
@@ -375,7 +335,7 @@ class Theme: Equatable {
         return cachedSpecifier
     }
     
-    private func viewSpecifier(fromDictionary dictionary: [String: Any]?) -> ViewSpecifier? {
+    internal func viewSpecifier(fromDictionary dictionary: [String: Any]?) -> ViewSpecifier? {
         guard let dictionary = dictionary else {
             return nil
         }
@@ -406,6 +366,7 @@ class Theme: Equatable {
         return viewSpecifier
     }
     
+<<<<<<< HEAD
     func navigationBarSpecifier(forKey key: String) -> NavigationBarSpecifier? {
         return self.navigationBarSpecifier(forKey: key, sizeAdjustment:0)
     }
@@ -736,37 +697,37 @@ class Theme: Equatable {
     
     // MARK: Other Public Helper Methods
     
-    func contains(key: String) -> Bool {
+    public func contains(key: String) -> Bool {
         guard let _ = self.themeDictionary[key] else {
             return false
         }
         return true
     }
     
-    func containsOrInherits(key: String) -> Bool {
+    public func containsOrInherits(key: String) -> Bool {
         guard let _ = self.object(forKey: key) else {
             return false
         }
         return true
     }
     
-    func clearFontCache() {
+    public func clearFontCache() {
         self.fontCache.removeAllObjects()
     }
     
-    func clearColorCache() {
+    public func clearColorCache() {
         self.colorCache.removeAllObjects()
     }
     
-    func clearViewSpecifierCache() {
+    public func clearViewSpecifierCache() {
         self.viewSpecifierCache.removeAllObjects()
     }
     
-    func clearNavigationBarSpecifierCache() {
+    public func clearNavigationBarSpecifierCache() {
         self.navigationBarSpecifierCache.removeAllObjects()
     }
     
-    func clearTextLabelSpecifierCache() {
+    public func clearTextLabelSpecifierCache() {
         self.textLabelSpecifierCache.removeAllObjects()
     }
 }
@@ -1103,7 +1064,18 @@ class TextLabelSpecifier {
 
 }
 
-class DashedBorderSpecifier {
+public class ViewSpecifier {
+    public var size = CGSize.zero
+    public var position = CGPoint.zero
+    public var backgroundColor: UIColor?
+    public var highlightedBackgroundColor: UIColor?
+    
+    /** Not used when creating a view \c -viewWithViewSpecifierKey:. How padding
+     affect the view to be interpreted by interested party. */
+    public var padding = UIEdgeInsets.zero
+}
+
+public class DashedBorderSpecifier {
     var lineWidth: Float = 0
     var color: UIColor?
     var cornerRadius: Float = 0
@@ -1111,4 +1083,3 @@ class DashedBorderSpecifier {
     var spacingSegmentLength: Float = 0
     var insets: UIEdgeInsets = .zero
 }
-
