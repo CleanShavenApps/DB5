@@ -6,7 +6,17 @@
 //  Copyright © 2017 Clean Shaven Apps Pte. Ltd. All rights reserved.
 //
 
+#if os(iOS)
 import UIKit
+public typealias Color = UIColor
+public typealias Font = UIFont
+public typealias EdgeInsets = UIEdgeInsets
+#elseif os(OSX)
+import Cocoa
+public typealias Color = NSColor
+public typealias Font = NSFont
+public typealias EdgeInsets = NSEdgeInsets
+#endif
 
 public enum TextCaseTransform {
     case none
@@ -22,13 +32,13 @@ public func stringIsEmpty(s: String?) -> Bool {
 }
 
 // Picky. Crashes by design.
-public func colorWithHexString(hexString: String?) -> UIColor {
+public func colorWithHexString(hexString: String?) -> Color {
     
     guard let hexString = hexString else {
-        return UIColor.black
+        return Color.black
     }
     if stringIsEmpty(s: hexString) {
-        return UIColor.black
+        return Color.black
     }
 
     let s: NSMutableString = NSMutableString(string: hexString)
@@ -43,7 +53,7 @@ public func colorWithHexString(hexString: String?) -> UIColor {
     Scanner(string: greenString).scanHexInt32(&g)
     Scanner(string: blueString).scanHexInt32(&b)
     
-    return UIColor(red: CGFloat(r)/255.0, green: CGFloat(g)/255.0, blue: CGFloat(b)/255.0, alpha: 1.0)
+    return Color(red: CGFloat(r)/255.0, green: CGFloat(g)/255.0, blue: CGFloat(b)/255.0, alpha: 1.0)
 }
 
 public class Theme: Equatable {
@@ -64,11 +74,11 @@ public class Theme: Equatable {
     
     // MARK: Lazy Accessors for Cache
     
-    internal lazy var colorCache: NSCache<NSString, UIColor> = {
+    internal lazy var colorCache: NSCache<NSString, Color> = {
         return NSCache()
     }()
     
-    internal lazy var fontCache: NSCache<NSString, UIFont> = {
+    internal lazy var fontCache: NSCache<NSString, Font> = {
         return NSCache()
     }()
     
@@ -175,17 +185,23 @@ public class Theme: Equatable {
     
     // MARK: Advanced Data Types
     
-    public func image(forKey key:String) -> UIImage? {
-        guard let imageName = self.string(forKey: key) else {
-            return nil
-        }
-        if stringIsEmpty(s: imageName) {
-            return nil
-        }
-        return UIImage(named: imageName)
+    public func edgeInsets(forKey key: String) -> EdgeInsets {
+        let insetsDictionary = self.dictionary(forKey: key)
+        let edgeInsets = self.edgeInsets(fromDictionary: insetsDictionary)
+        return edgeInsets
     }
     
-    public func color(forKey key: String) -> UIColor {
+    internal func edgeInsets(fromDictionary dictionary: [String: Any]?) -> EdgeInsets {
+        let left = CGFloat(self.float(fromObject: dictionary?["left"]))
+        let top = CGFloat(self.float(fromObject: dictionary?["top"]))
+        let right = CGFloat(self.float(fromObject: dictionary?["right"]))
+        let bottom = CGFloat(self.float(fromObject: dictionary?["bottom"]))
+        
+        let edgeInsets = EdgeInsets(top: top, left: left, bottom: bottom, right: right)
+        return edgeInsets
+    }
+    
+    public func color(forKey key: String) -> Color {
         guard let cachedColor = self.colorCache.object(forKey: key as NSString) else {
             let colorDictionary = self.dictionary(forKey: key)
             let color = self.color(fromDictionary: colorDictionary)
@@ -195,13 +211,13 @@ public class Theme: Equatable {
         return cachedColor
     }
     
-    internal func color(fromDictionary dictionary: [String: Any]?) -> UIColor {
+    internal func color(fromDictionary dictionary: [String: Any]?) -> Color {
 
         guard let dictionary = dictionary else {
-            return UIColor.black
+            return Color.black
         }
         
-        var color: UIColor?
+        var color: Color?
         let alphaObject = dictionary["alpha"]
         if let hexString = dictionary["hex"] as? String {
             color = colorWithHexString(hexString: hexString)
@@ -213,38 +229,18 @@ public class Theme: Equatable {
         else if let alphaObject = alphaObject {
             let alpha = self.float(fromObject: alphaObject)
             if alpha == 0 {
-                color = UIColor.clear
+                color = Color.clear
             }
         }
         
         if color == nil {
-            color = UIColor.black
+            color = Color.black
         }
         
         return color!
     }
     
-    public func edgeInsets(forKey key: String) -> UIEdgeInsets {
-        let insetsDictionary = self.dictionary(forKey: key)
-        let edgeInsets = self.edgeInsets(fromDictionary: insetsDictionary)
-        return edgeInsets
-    }
-    
-    internal func edgeInsets(fromDictionary dictionary: [String: Any]?) -> UIEdgeInsets {
-        let left = CGFloat(self.float(fromObject: dictionary?["left"]))
-        let top = CGFloat(self.float(fromObject: dictionary?["top"]))
-        let right = CGFloat(self.float(fromObject: dictionary?["right"]))
-        let bottom = CGFloat(self.float(fromObject: dictionary?["bottom"]))
-        
-        let edgeInsets = UIEdgeInsets(top: top, left: left, bottom: bottom, right: right)
-        return edgeInsets
-    }
-    
-//    func font(forKey key: String) -> UIFont? {
-//    }
-
-    
-    public func font(forKey key:String, sizeAdjustment: Float) -> UIFont {
+    public func font(forKey key:String, sizeAdjustment: Float) -> Font {
         let cacheKey = key.appendingFormat("_%.2f", sizeAdjustment)
         guard let cachedFont = self.fontCache.object(forKey: cacheKey as NSString) else {
             let fontDictionary = self.dictionary(forKey: key)
@@ -255,7 +251,7 @@ public class Theme: Equatable {
         return cachedFont
     }
     
-    internal func font(fromDictionary dictionary: [String: Any]?, sizeAdjustment: Float) -> UIFont {
+    internal func font(fromDictionary dictionary: [String: Any]?, sizeAdjustment: Float) -> Font {
         let fontName = self.string(fromObject: dictionary?["name"])
         var fontSize = CGFloat(self.float(fromObject: dictionary?["size"]))
         
@@ -265,18 +261,18 @@ public class Theme: Equatable {
             fontSize = 15.0
         }
         
-        var font: UIFont?
+        var font: Font?
         if let fontName = fontName {
             if stringIsEmpty(s: fontName) {
-                font = UIFont.systemFont(ofSize: fontSize)
+                font = Font.systemFont(ofSize: fontSize)
             }
             else {
-                font = UIFont(name: fontName, size: fontSize)
+                font = Font(name: fontName, size: fontSize)
             }
         }
 
         if font == nil {
-            font = UIFont.systemFont(ofSize: fontSize)
+            font = Font.systemFont(ofSize: fontSize)
         }
         return font!
     }
@@ -453,334 +449,4 @@ public class Theme: Equatable {
     }
 }
 
-//class AnimationSpecifier {
-//    var delay: TimeInterval = 0
-//    var duration: TimeInterval = 0
-//    var curve: UIViewAnimationOptions = .curveEaseInOut
-//}
 
-//class ViewSpecifier {
-//    var size = CGSize.zero
-//    var position = CGPoint.zero
-//    var backgroundColor: UIColor?
-//    var highlightedBackgroundColor: UIColor?
-//    var disabledBackgroundColor: UIColor?
-//
-//    /** Not used when creating a view \c -viewWithViewSpecifierKey:. How padding
-//     affect the view to be interpreted by interested party. */
-//    var padding = UIEdgeInsets.zero
-//
-//    func backgroundColor(forState state: UIControlState) -> UIColor? {
-//        switch state {
-//        case .normal:
-//            return backgroundColor
-//        case .highlighted:
-//            return highlightedBackgroundColor
-//        case .disabled:
-//            return disabledBackgroundColor
-//        default:
-//            return nil
-//        }
-//    }
-//}
-
-//class NavigationBarSpecifier {
-//    
-//    var translucent: Bool = false
-//    var barStyle: UIBarStyle = .default
-//    var popoverBackgroundColor: UIColor?
-//    var barColor: UIColor?
-//    var tintColor: UIColor?
-//    var titleLabelSpecifier: TextLabelSpecifier?
-//    var buttonsLabelSpecifier: TextLabelSpecifier?
-//    func apply(toNavigationBar navigationBar: UINavigationBar, containedInClass containingClass: UIAppearanceContainer.Type?) {
-//        
-//        if let barColor = self.barColor {
-//            navigationBar.barTintColor = barColor
-//        }
-//        if let tintColor = self.tintColor {
-//            navigationBar.tintColor = tintColor
-//        }
-//        
-//        navigationBar.isTranslucent = self.translucent
-//        
-//        if let titleLabelSpecifier = self.titleLabelSpecifier {
-//            let attributes = titleLabelSpecifier.attributes(forKeys: [
-//                NSAttributedStringKey.font,
-//                NSAttributedStringKey.foregroundColor])
-//            navigationBar.titleTextAttributes = attributes
-//        }
-//        
-//        if let buttonsLabelSpecifier = self.buttonsLabelSpecifier {
-//            let attributes = buttonsLabelSpecifier.attributes(forKeys: [
-//                NSAttributedStringKey.font,
-//                NSAttributedStringKey.foregroundColor])
-//            if let containingClass = containingClass {
-//                UIBarButtonItem.appearance(whenContainedInInstancesOf: [UINavigationBar.self, containingClass]).setTitleTextAttributes(attributes, for: .normal)
-//            }
-//            else {
-//                UIBarButtonItem.appearance(whenContainedInInstancesOf: [UINavigationBar.self]).setTitleTextAttributes(attributes, for: .normal)
-//            }
-//        }
-//    }
-//}
-
-//class TextLabelSpecifier {
-//    
-//    var font: UIFont?
-//    var size = CGSize.zero
-//    /** If YES, \c size should be ignored when creating a text label from it */
-//    var sizeToFit: Bool = false
-//    var position = CGPoint.zero
-//    /** Default: 1 (single line) */
-//    var numberOfLines: Int = 1
-//    
-//    var paragraphSpacing: Float = 0
-//    var paragraphSpacingBefore: Float = 0
-//    /// If multiple is > 0, takes precedence over paragraphSpacing
-//    var paragraphSpacingMultiple: Float = 0
-//    /// If multiple is > 0, takes precedence over paragraphSpacingBefore
-//    var paragraphSpacingBeforeMultiple: Float = 0
-//    
-//    /// Line spacing affect line breaks (\u2028), while paragraph spacing affects paragraph breaks (\u2029). The line spacing is calculated with the font.pointSize multipled by lineSpacingMultiple.
-//    var lineSpacingMultiple: Float = 0
-//    
-//    var alignment: NSTextAlignment = .left
-//    var lineBreakMode: NSLineBreakMode = .byWordWrapping
-//    var textTransform: TextCaseTransform = .none
-//    
-//    var color: UIColor?
-//    var highlightedColor: UIColor?
-//    var disabledColor: UIColor?
-//    
-//    var backgroundColor: UIColor?
-//    var highlightedBackgroundColor: UIColor?
-//    var disabledBackgroundColor: UIColor?
-//    
-//    /** Not used when creating a view \c -labelWithText:specifierKey:sizeAdjustment:
-//     How padding affect the text label to be interpreted by interested party. */
-//    var padding: UIEdgeInsets?
-//    
-//    /** Attributes representing the font, color, backgroundColor, alignment and lineBreakMode */
-//    var attributes: [NSAttributedStringKey: Any]?
-//    
-//    func label(withText text: String) -> UILabel {
-//        let frame = CGRect(origin: self.position, size: self.size)
-//        return self.label(withText: text, frame: frame)
-//    }
-//    
-//    func label(withText text: String, frame: CGRect) -> UILabel {
-//        let label = UILabel(frame: frame)
-//        self.apply(toLabel: label, withText: text)
-//        return label
-//    }
-//    
-//    func transform(text: String) -> String {
-//        var transformedText: String
-//        switch self.textTransform {
-//        case .upper:
-//            transformedText = text.uppercased()
-//            break
-//        case .lower:
-//            transformedText = text.lowercased()
-//            break
-//        case .none:
-//            transformedText = text
-//            break
-//        }
-//        return transformedText
-//    }
-//    
-//    private lazy var defaultTextLabelAttributes = {
-//        return [NSAttributedStringKey.font,
-//                NSAttributedStringKey.foregroundColor,
-//                NSAttributedStringKey.backgroundColor,
-//                NSAttributedStringKey.paragraphStyle]
-//    }()
-//    
-//    func attributedString(withText text: String, forState state: UIControlState = .normal, generateMissingColorsUsingAlphaOfNormalColors alpha: CGFloat? = nil) -> NSAttributedString {
-//        
-//        var customForeground: UIColor?
-//        var customBackground: UIColor?
-//        
-//        switch state {
-//        case .normal:
-//            customForeground = self.color
-//            customBackground = self.backgroundColor
-//        case .highlighted:
-//            customForeground = self.highlightedColor
-//            customBackground = self.highlightedBackgroundColor
-//        case .disabled:
-//            customForeground = self.disabledColor
-//            customBackground = self.disabledBackgroundColor
-//        default:
-//            // We're generating optional custom foreground or background colors.
-//            // If an invalid state is provided then we just ignore it and pass
-//            // no custom colors
-//            break
-//        }
-//        
-//        // Generate missing colors if necessary
-//        switch state {
-//        case .highlighted, .disabled:
-//            if let alpha = alpha {
-//                if customForeground == nil, let normalForeground = self.color {
-//                    customForeground = normalForeground.withAlphaComponent(alpha)
-//                }
-//                
-//                if customBackground == nil, let normalBackground = self.backgroundColor {
-//                    customBackground = normalBackground.withAlphaComponent(alpha)
-//                }
-//            }
-//        default:
-//            break
-//        }
-//        
-//        let attributes = self.attributes(forKeys: defaultTextLabelAttributes, customForegroundColor: customForeground, customBackgroundColor: customBackground)
-//        
-//        return self.attributedString(withText: text, attributes: attributes)
-//    }
-//    
-//    func attributedString(withText text: String, attributes: [NSAttributedStringKey: Any]) -> NSAttributedString {
-//        let transformedText = self.transform(text: text)
-//        return NSAttributedString(string: transformedText, attributes: attributes)
-//    }
-//    
-//    func fontAndColorAttributes() -> [NSAttributedStringKey: Any] {
-//        return self.attributes(forKeys: [
-//            NSAttributedStringKey.font,
-//            NSAttributedStringKey.foregroundColor,
-//            NSAttributedStringKey.backgroundColor])
-//    }
-//    
-//    func attributes(forKeys keys: [NSAttributedStringKey], customForegroundColor: UIColor? = nil, customBackgroundColor: UIColor? = nil) -> [NSAttributedStringKey: Any] {
-//        var textAttributes: [NSAttributedStringKey: Any] = [:]
-//        for key in keys {
-//            if key == NSAttributedStringKey.paragraphStyle {
-//                if let paragraphStyle = NSMutableParagraphStyle.default.mutableCopy() as? NSMutableParagraphStyle {
-//                    
-//                    paragraphStyle.lineBreakMode = self.lineBreakMode
-//                    paragraphStyle.alignment = self.alignment
-//                    
-//                    if self.paragraphSpacingMultiple>0, let font = self.font {
-//                        paragraphStyle.paragraphSpacing = font.pointSize * CGFloat(self.paragraphSpacingMultiple)
-//                    }
-//                    else if self.paragraphSpacing>0 {
-//                        paragraphStyle.paragraphSpacing = CGFloat(paragraphSpacing)
-//                    }
-//                    else if self.paragraphSpacingBeforeMultiple>0, let font = self.font {
-//                        paragraphStyle.paragraphSpacing = font.pointSize * CGFloat(self.paragraphSpacingBeforeMultiple)
-//                    }
-//                    else if self.paragraphSpacingBefore>0 {
-//                        paragraphStyle.paragraphSpacing = CGFloat(paragraphSpacingBefore)
-//                    }
-//                    
-//                    if self.lineSpacingMultiple>0, let font = self.font {
-//                        paragraphStyle.lineSpacing = font.pointSize * CGFloat(self.lineSpacingMultiple)
-//                    }
-//                    
-//                    textAttributes[key] = paragraphStyle
-//                }
-//            }
-//            else if key == NSAttributedStringKey.font {
-//                if let font = self.font {
-//                    textAttributes[key] = font
-//                }
-//            }
-//            else if key == NSAttributedStringKey.foregroundColor {
-//                if let color = customForegroundColor ?? self.color {
-//                    textAttributes[key] = color
-//                }
-//            }
-//            else if key == NSAttributedStringKey.backgroundColor {
-//                if let backgroundColor =  customBackgroundColor ?? self.backgroundColor {
-//                    textAttributes[key] = backgroundColor
-//                }
-//            }
-//            else {
-//                assertionFailure("Invalid key \(key) to obtain attribute for")
-//            }
-//        }
-//        
-//        return textAttributes
-//    }
-//    
-//    func apply(toLabel label: UILabel) {
-//        self.apply(toLabel: label, withText: nil)
-//    }
-//    
-//    func apply(toLabel label: UILabel, withText text: String?) {
-//        if let text = text {
-//            label.text = self.transform(text: text)
-//        }
-//        if let font = self.font {
-//            label.font = font
-//        }
-//        label.textAlignment = self.alignment
-//        label.numberOfLines = self.numberOfLines
-//        if let color = self.color {
-//            label.textColor = color
-//        }
-//        if let backgroundColor = self.backgroundColor {
-//            label.backgroundColor = backgroundColor
-//        }
-//        if self.sizeToFit {
-//            label.sizeToFit()
-//        }
-//    }
-//
-//    func apply(toButton button: UIButton, title: String, states: [UIControlState]) {
-//        for state in states {
-//            let attributedTitle = attributedString(withText: title, forState: state)
-//            button.setAttributedTitle(attributedTitle, for: state)
-//        }
-//    }
-//    
-//    func apply(toButton button: UIButton, titleForNormalAndHighlightedState title: String, generateMissingHighlightedColorsUsingColorsWithAlphaComponent alphaComponent: CGFloat? = 0.5) {
-//        let normalTitle = attributedString(withText: title)
-//        button.setAttributedTitle(normalTitle, for: .normal)
-//        
-//        let highlightedTitle = attributedString(withText: title, forState: .highlighted, generateMissingColorsUsingAlphaOfNormalColors: alphaComponent)
-//        button.setAttributedTitle(highlightedTitle, for: .highlighted)
-//    }
-//    
-//    func apply(toButton button: UIButton, titleForDisabledState title: String) {
-//        let disabledTitle = self.attributedString(withText: title)
-//        button.setAttributedTitle(disabledTitle, for: .disabled)
-//    }
-//
-//}
-
-public class ViewSpecifier {
-    public var size = CGSize.zero
-    public var position = CGPoint.zero
-    public var backgroundColor: UIColor?
-    public var highlightedBackgroundColor: UIColor?
-    public var disabledBackgroundColor: UIColor?
-    
-    /** Not used when creating a view \c -viewWithViewSpecifierKey:. How padding
-     affect the view to be interpreted by interested party. */
-    public var padding = UIEdgeInsets.zero
-    
-    public func backgroundColor(forState state: UIControlState) -> UIColor? {
-        switch state {
-        case .normal:
-            return backgroundColor
-        case .highlighted:
-            return highlightedBackgroundColor
-        case .disabled:
-            return disabledBackgroundColor
-        default:
-            return nil
-        }
-    }
-}
-
-public class DashedBorderSpecifier {
-    var lineWidth: Float = 0
-    var color: UIColor?
-    var cornerRadius: Float = 0
-    var paintedSegmentLength: Float = 0
-    var spacingSegmentLength: Float = 0
-    var insets: UIEdgeInsets = .zero
-}
