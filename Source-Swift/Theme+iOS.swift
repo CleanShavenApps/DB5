@@ -54,17 +54,88 @@ public extension Theme {
     }
     
     private func statusBarStyle(fromObject object: Any?) -> UIStatusBarStyle {
-        var statusBarStyleString = self.string(fromObject: object)
-        if !stringIsEmpty(s: statusBarStyleString) {
-            statusBarStyleString = statusBarStyleString?.lowercased()
-            if statusBarStyleString == "darkcontent" {
-                return .default
-            }
-            else if statusBarStyleString == "lightcontent" {
-                return .lightContent
-            }
+        guard let statusBarStyleString = self.string(fromObject: object)?.lowercased(), stringIsEmpty(s: statusBarStyleString) == false else {
+            return .default
         }
-        return .default
+        
+        switch statusBarStyleString {
+        case "darkcontent":
+            return .default
+        case "lightcontent":
+            return .lightContent
+        default:
+            return .default
+        }
+    }
+    
+    /** Where the possible values are extralight, light, dark, regular, prominent */
+    func blueEffectStyle(forKey key: String) -> UIBlurEffectStyle {
+        let obj = self.object(forKey: key)
+        return blurEffectStyle(fromObject: obj)
+    }
+    
+    private func blurEffectStyle(fromObject object: Any?) -> UIBlurEffectStyle {
+        guard let blurEffectStyleString = self.string(fromObject: object)?.lowercased(), stringIsEmpty(s: blurEffectStyleString) == false else {
+            return .extraLight
+        }
+        
+        switch blurEffectStyleString {
+        case "extralight":
+            return .extraLight
+        case "light":
+            return .light
+        case "dark":
+            return .dark
+        case "regular":
+            return .regular
+        case "prominent":
+            return .prominent
+        default:
+            return .extraLight
+        }
+    }
+    
+    /** Where the possible values are whitelarge, white, gray. Defaults to gray */
+    func activityIndicatorViewStyle(forKey key: String) -> UIActivityIndicatorViewStyle {
+        let obj = self.object(forKey: key)
+        return activityIndicatorViewStyle(fromObject: obj)
+    }
+    
+    private func activityIndicatorViewStyle(fromObject object: Any?) -> UIActivityIndicatorViewStyle {
+        guard let barStyleString = string(fromObject: object)?.lowercased(), stringIsEmpty(s: barStyleString) == false else {
+            return .gray
+        }
+        
+        switch barStyleString {
+        case "whitelarge":
+            return .whiteLarge
+        case "white":
+            return .white
+        case "gray":
+            return .gray
+        default:
+            return .gray
+        }
+    }
+    
+    func barStyle(forKey key: String) -> UIBarStyle {
+        let obj = self.object(forKey: key)
+        return barStyle(fromObject: obj)
+    }
+    
+    private func barStyle(fromObject object: Any?) -> UIBarStyle {
+        guard let barStyleString = string(fromObject: object)?.lowercased(), stringIsEmpty(s: barStyleString) == false else {
+            return .default
+        }
+        
+        switch barStyleString {
+        case "default":
+            return .default
+        case "black":
+            return .black
+        default:
+            return .default
+        }
     }
     
     public func keyboardAppearance(forKey key: String) -> UIKeyboardAppearance {
@@ -89,6 +160,7 @@ public extension Theme {
     public func navigationBarSpecifier(forKey key: String) -> NavigationBarSpecifier? {
         return self.navigationBarSpecifier(forKey: key, sizeAdjustment:0)
     }
+
     
     public func navigationBarSpecifier(forKey key: String, sizeAdjustment: Float) -> NavigationBarSpecifier? {
         guard let cachedSpecifier = self.navigationBarSpecifierCache.object(forKey: key as NSString) else {
@@ -114,9 +186,13 @@ public extension Theme {
             
             navigationBarSpecifier.buttonsLabelSpecifier = self.textLabelSpecifier(fromDictionary: dictionary["buttonsLabel"] as? [String : Any], sizeAdjustment: sizeAdjustment)
             
-            // always translucent by default
-            let translucent = !self.bool(forObject: dictionary["disableTranslucency"])
-            navigationBarSpecifier.translucent = translucent
+            // translucent by default (initializer)
+            if let translucentObject = dictionary["translucency"] {
+                navigationBarSpecifier.translucent = bool(forObject: translucentObject)
+            }
+            
+            let barStyle = self.barStyle(fromObject: dictionary["barStyle"])
+            navigationBarSpecifier.barStyle = barStyle;
             
             self.navigationBarSpecifierCache.setObject(navigationBarSpecifier, forKey: key as NSString)
             return navigationBarSpecifier
@@ -172,6 +248,8 @@ public extension Theme {
         labelSpecifier.paragraphSpacingBefore = self.float(fromObject: dictionary["paragraphSpacingBefore"])
         labelSpecifier.paragraphSpacingBeforeMultiple = self.float(fromObject: dictionary["paragraphSpacingBeforeMultiple"])
         
+        labelSpecifier.lineSpacingMultiple = self.float(fromObject: dictionary["lineSpacingMultiple"])
+        
         let alignmentString = self.string(fromObject: dictionary["alignment"])
         labelSpecifier.alignment = self.textAlignment(fromObject: alignmentString)
         
@@ -189,6 +267,10 @@ public extension Theme {
             labelSpecifier.highlightedColor = self.color(fromDictionary: highlightedColorDictionary)
         }
         
+        if let disabledColorDictionary = self.dictionary(fromObject: dictionary["disabledColor"]) {
+            labelSpecifier.disabledColor = self.color(fromDictionary: disabledColorDictionary)
+        }
+        
         if let backgroundColorDictionary = self.dictionary(fromObject: dictionary["backgroundColor"]) {
             labelSpecifier.backgroundColor = self.color(fromDictionary: backgroundColorDictionary)
         }
@@ -197,14 +279,18 @@ public extension Theme {
             labelSpecifier.highlightedBackgroundColor = self.color(fromDictionary: highlightedBackgroundColorDictionary)
         }
         
+        if let disabledBackgroundColorDictionary = self.dictionary(fromObject: dictionary["disabledBackgroundColor"]) {
+            labelSpecifier.disabledBackgroundColor = self.color(fromDictionary: disabledBackgroundColorDictionary)
+        }
+        
         let edgeInsetsDictionary = self.dictionary(fromObject: dictionary["padding"])
         labelSpecifier.padding = self.edgeInsets(fromDictionary: edgeInsetsDictionary)
         
         let allAttributes = [
-            NSAttributedString.Key.font,
-            NSAttributedString.Key.foregroundColor,
-            NSAttributedString.Key.backgroundColor,
-            NSAttributedString.Key.paragraphStyle]
+            NSAttributedStringKey.font,
+            NSAttributedStringKey.foregroundColor,
+            NSAttributedStringKey.backgroundColor,
+            NSAttributedStringKey.paragraphStyle]
         labelSpecifier.attributes = labelSpecifier.attributes(forKeys: allAttributes)
         return labelSpecifier
     }
@@ -332,6 +418,7 @@ public class AnimationSpecifier {
 public class NavigationBarSpecifier {
     
     public var translucent: Bool = false
+    public var barStyle: UIBarStyle = .default
     public var popoverBackgroundColor: UIColor?
     public var barColor: UIColor?
     public var tintColor: UIColor?
@@ -386,13 +473,20 @@ public class TextLabelSpecifier {
     /// If multiple is > 0, takes precedence over paragraphSpacingBefore
     var paragraphSpacingBeforeMultiple: Float = 0
     
+    /// Line spacing affect line breaks (\u2028), while paragraph spacing affects paragraph breaks (\u2029). The line spacing is calculated with the font.pointSize multipled by lineSpacingMultiple.
+    var lineSpacingMultiple: Float = 0
+    
     var alignment: NSTextAlignment = .left
     var lineBreakMode: NSLineBreakMode = .byWordWrapping
     var textTransform: TextCaseTransform = .none
+    
     var color: UIColor?
     var highlightedColor: UIColor?
+    var disabledColor: UIColor?
+    
     var backgroundColor: UIColor?
     var highlightedBackgroundColor: UIColor?
+    var disabledBackgroundColor: UIColor?
     
     /** Not used when creating a view \c -labelWithText:specifierKey:sizeAdjustment:
      How padding affect the text label to be interpreted by interested party. */
@@ -428,6 +522,56 @@ public class TextLabelSpecifier {
         return transformedText
     }
     
+    private lazy var defaultTextLabelAttributes = {
+        return [NSAttributedStringKey.font,
+                NSAttributedStringKey.foregroundColor,
+                NSAttributedStringKey.backgroundColor,
+                NSAttributedStringKey.paragraphStyle]
+    }()
+    
+    func attributedString(withText text: String, forState state: UIControlState = .normal, generateMissingColorsUsingAlphaOfNormalColors alpha: CGFloat? = nil) -> NSAttributedString {
+        
+        var customForeground: UIColor?
+        var customBackground: UIColor?
+        
+        switch state {
+        case .normal:
+            customForeground = self.color
+            customBackground = self.backgroundColor
+        case .highlighted:
+            customForeground = self.highlightedColor
+            customBackground = self.highlightedBackgroundColor
+        case .disabled:
+            customForeground = self.disabledColor
+            customBackground = self.disabledBackgroundColor
+        default:
+            // We're generating optional custom foreground or background colors.
+            // If an invalid state is provided then we just ignore it and pass
+            // no custom colors
+            break
+        }
+        
+        // Generate missing colors if necessary
+        switch state {
+        case .highlighted, .disabled:
+            if let alpha = alpha {
+                if customForeground == nil, let normalForeground = self.color {
+                    customForeground = normalForeground.withAlphaComponent(alpha)
+                }
+                
+                if customBackground == nil, let normalBackground = self.backgroundColor {
+                    customBackground = normalBackground.withAlphaComponent(alpha)
+                }
+            }
+        default:
+            break
+        }
+        
+        let attributes = self.attributes(forKeys: defaultTextLabelAttributes, customForegroundColor: customForeground, customBackgroundColor: customBackground)
+        
+        return self.attributedString(withText: text, attributes: attributes)
+    }
+    
     func attributedString(withText text: String) -> NSAttributedString {
         let allAttributes = self.attributes(forKeys: [
             NSAttributedString.Key.font,
@@ -449,10 +593,10 @@ public class TextLabelSpecifier {
             NSAttributedString.Key.backgroundColor])
     }
     
-    func attributes(forKeys keys: [NSAttributedString.Key]) -> [NSAttributedString.Key: Any] {
-        var textAttributes: [NSAttributedString.Key: Any] = [:]
+    func attributes(forKeys keys: [NSAttributedStringKey], customForegroundColor: UIColor? = nil, customBackgroundColor: UIColor? = nil) -> [NSAttributedStringKey: Any] {
+        var textAttributes: [NSAttributedStringKey: Any] = [:]
         for key in keys {
-            if key == NSAttributedString.Key.paragraphStyle {
+            if key == NSAttributedStringKey.paragraphStyle {
                 if let paragraphStyle = NSMutableParagraphStyle.default.mutableCopy() as? NSMutableParagraphStyle {
                     
                     paragraphStyle.lineBreakMode = self.lineBreakMode
@@ -470,21 +614,26 @@ public class TextLabelSpecifier {
                     else if self.paragraphSpacingBefore>0 {
                         paragraphStyle.paragraphSpacing = CGFloat(paragraphSpacingBefore)
                     }
+                    
+                    if self.lineSpacingMultiple>0, let font = self.font {
+                        paragraphStyle.lineSpacing = font.pointSize * CGFloat(self.lineSpacingMultiple)
+                    }
+                    
                     textAttributes[key] = paragraphStyle
                 }
             }
-            else if key == NSAttributedString.Key.font {
+            else if key == NSAttributedStringKey.font {
                 if let font = self.font {
                     textAttributes[key] = font
                 }
             }
-            else if key == NSAttributedString.Key.foregroundColor {
-                if let color = self.color {
+            else if key == NSAttributedStringKey.foregroundColor {
+                if let color = customForegroundColor ?? self.color {
                     textAttributes[key] = color
                 }
             }
-            else if key == NSAttributedString.Key.backgroundColor {
-                if let backgroundColor = self.backgroundColor {
+            else if key == NSAttributedStringKey.backgroundColor {
+                if let backgroundColor =  customBackgroundColor ?? self.backgroundColor {
                     textAttributes[key] = backgroundColor
                 }
             }
@@ -518,6 +667,26 @@ public class TextLabelSpecifier {
         if self.sizeToFit {
             label.sizeToFit()
         }
+    }
+    
+    func apply(toButton button: UIButton, title: String, states: [UIControlState]) {
+        for state in states {
+            let attributedTitle = attributedString(withText: title, forState: state)
+            button.setAttributedTitle(attributedTitle, for: state)
+        }
+    }
+    
+    func apply(toButton button: UIButton, titleForNormalAndHighlightedState title: String, generateMissingHighlightedColorsUsingColorsWithAlphaComponent alphaComponent: CGFloat? = 0.5) {
+        let normalTitle = attributedString(withText: title)
+        button.setAttributedTitle(normalTitle, for: .normal)
+        
+        let highlightedTitle = attributedString(withText: title, forState: .highlighted, generateMissingColorsUsingAlphaOfNormalColors: alphaComponent)
+        button.setAttributedTitle(highlightedTitle, for: .highlighted)
+    }
+    
+    func apply(toButton button: UIButton, titleForDisabledState title: String) {
+        let disabledTitle = self.attributedString(withText: title)
+        button.setAttributedTitle(disabledTitle, for: .disabled)
     }
 }
 
