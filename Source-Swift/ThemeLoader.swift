@@ -6,7 +6,7 @@
 //  Copyright © 2017 Clean Shaven Apps Pte. Ltd. All rights reserved.
 //
 
-import UIKit
+import Foundation
 
 public class ThemeLoader {
     private(set) var defaultTheme: Theme!
