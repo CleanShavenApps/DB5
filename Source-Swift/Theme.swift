@@ -412,6 +412,101 @@ public class Theme: Equatable {
         return .byTruncatingTail
     }
     
+    public func textLabelSpecifier(forKey key: String) -> TextLabelSpecifier? {
+        return self.textLabelSpecifier(forKey: key, sizeAdjustment: 0)
+    }
+    
+    public func textLabelSpecifier(forKey key: String, sizeAdjustment: Float) -> TextLabelSpecifier? {
+        let cacheKey = key.appendingFormat("_%.2f", sizeAdjustment)
+        guard let cachedSpecifier = self.textLabelSpecifierCache.object(forKey: cacheKey as NSString) else {
+            let dictionary = self.dictionary(forKey: key)
+            let labelSpecifier = self.textLabelSpecifier(fromDictionary: dictionary, sizeAdjustment: sizeAdjustment)
+            if let labelSpecifier = labelSpecifier {
+                self.textLabelSpecifierCache.setObject(labelSpecifier, forKey: cacheKey as NSString)
+            }
+            return labelSpecifier
+        }
+        return cachedSpecifier
+    }
+    
+    public func textLabelSpecifier(fromDictionary dictionary: [String: Any]?, sizeAdjustment: Float) -> TextLabelSpecifier? {
+        
+        guard let dictionary = dictionary else {
+            return nil
+        }
+        
+        let labelSpecifier = TextLabelSpecifier()
+        
+        let fontDictionary = self.dictionary(fromObject: dictionary["font"])
+        labelSpecifier.font = self.font(fromDictionary: fontDictionary, sizeAdjustment: sizeAdjustment)
+        
+        let sizeDictionary = self.dictionary(fromObject: dictionary["size"])
+        labelSpecifier.size = self.size(fromDictionary: sizeDictionary)
+        
+        labelSpecifier.sizeToFit = self.bool(forObject: dictionary["sizeToFit"])
+        
+        let positionDictionary = self.dictionary(fromObject: dictionary["position"])
+        labelSpecifier.position = self.point(fromDictionary: positionDictionary)
+        
+        if let numberOfLines = dictionary["numberOfLines"] {
+            labelSpecifier.numberOfLines = self.integer(fromObject: numberOfLines)
+        }
+        else {
+            labelSpecifier.numberOfLines = 1
+        }
+        
+        labelSpecifier.paragraphSpacing = self.float(fromObject: dictionary["paragraphSpacing"])
+        labelSpecifier.paragraphSpacingMultiple = self.float(fromObject: dictionary["paragraphSpacingMultiple"])
+        labelSpecifier.paragraphSpacingBefore = self.float(fromObject: dictionary["paragraphSpacingBefore"])
+        labelSpecifier.paragraphSpacingBeforeMultiple = self.float(fromObject: dictionary["paragraphSpacingBeforeMultiple"])
+        
+        labelSpecifier.lineSpacingMultiple = self.float(fromObject: dictionary["lineSpacingMultiple"])
+        
+        let alignmentString = self.string(fromObject: dictionary["alignment"])
+        labelSpecifier.alignment = self.textAlignment(fromObject: alignmentString)
+        
+        let lineBreakString = self.string(fromObject: dictionary["lineBreakMode"])
+        labelSpecifier.lineBreakMode = self.lineBreakMode(fromObject: lineBreakString)
+        
+        let textTransformString = self.string(fromObject: dictionary["textTransform"])
+        labelSpecifier.textTransform = self.textCaseTransform(fromString: textTransformString)
+        
+        if let colorDictionary = self.dictionary(fromObject: dictionary["color"]) {
+            labelSpecifier.color = self.color(fromDictionary: colorDictionary)
+        }
+        
+        if let highlightedColorDictionary = self.dictionary(fromObject: dictionary["highlightedColor"]) {
+            labelSpecifier.highlightedColor = self.color(fromDictionary: highlightedColorDictionary)
+        }
+        
+        if let disabledColorDictionary = self.dictionary(fromObject: dictionary["disabledColor"]) {
+            labelSpecifier.disabledColor = self.color(fromDictionary: disabledColorDictionary)
+        }
+        
+        if let backgroundColorDictionary = self.dictionary(fromObject: dictionary["backgroundColor"]) {
+            labelSpecifier.backgroundColor = self.color(fromDictionary: backgroundColorDictionary)
+        }
+        
+        if let highlightedBackgroundColorDictionary = self.dictionary(fromObject: dictionary["highlightedBackgroundColor"]) {
+            labelSpecifier.highlightedBackgroundColor = self.color(fromDictionary: highlightedBackgroundColorDictionary)
+        }
+        
+        if let disabledBackgroundColorDictionary = self.dictionary(fromObject: dictionary["disabledBackgroundColor"]) {
+            labelSpecifier.disabledBackgroundColor = self.color(fromDictionary: disabledBackgroundColorDictionary)
+        }
+        
+        let edgeInsetsDictionary = self.dictionary(fromObject: dictionary["padding"])
+        labelSpecifier.padding = self.edgeInsets(fromDictionary: edgeInsetsDictionary)
+        
+        let allAttributes = [
+            NSAttributedString.Key.font,
+            NSAttributedString.Key.foregroundColor,
+            NSAttributedString.Key.backgroundColor,
+            NSAttributedString.Key.paragraphStyle]
+        labelSpecifier.attributes = labelSpecifier.attributes(forKeys: allAttributes)
+        return labelSpecifier
+    }
+    
     // MARK: Other Public Helper Methods
     
     public func contains(key: String) -> Bool {

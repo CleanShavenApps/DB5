@@ -16,7 +16,7 @@ class NavigationBarSpecifier {
     
 }
 
-class TextLabelSpecifier {
+public class TextLabelSpecifier {
     var font: NSFont?
     var size = CGSize.zero
     /** If YES, \c size should be ignored when creating a text label from it */
