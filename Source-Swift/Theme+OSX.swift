@@ -10,6 +10,39 @@ import Cocoa
 
 public extension Theme {
 
+    public func tableViewSpecifier(forKey key: String) -> TableViewSpecifier? {
+        guard let cachedSpecifier = self.viewSpecifierCache.object(forKey: key as NSString) as? TableViewSpecifier else {
+            let dictionary = self.dictionary(forKey: key)
+            let viewSpecifier = self.tableViewSpecifier(fromDictionary: dictionary)
+            if let viewSpecifier = viewSpecifier {
+                self.viewSpecifierCache.setObject(viewSpecifier, forKey: key as NSString)
+            }
+            return viewSpecifier
+        }
+        return cachedSpecifier
+    }
+    
+    internal func tableViewSpecifier(fromDictionary dictionary: [String: Any]?) -> TableViewSpecifier? {
+        guard let dictionary = dictionary else {
+            return nil
+        }
+        
+        let viewSpecifier = TableViewSpecifier()
+
+        let sizeDictionary = self.dictionary(fromObject: dictionary["intercellSpacing"])
+        viewSpecifier.intercellSpacing
+            = self.size(fromDictionary: sizeDictionary)
+        
+        if let backgroundColorDictionary = self.dictionary(fromObject: dictionary["backgroundColor"]) {
+            viewSpecifier.backgroundColor = self.color(fromDictionary: backgroundColorDictionary)
+        }
+
+        if let separatorColorDictionary = self.dictionary(fromObject: dictionary["separatorColor"]) {
+            viewSpecifier.separatorColor = self.color(fromDictionary: separatorColorDictionary)
+        }
+
+        return viewSpecifier
+    }
 }
 
 class NavigationBarSpecifier {
@@ -197,6 +230,24 @@ public class ViewSpecifier {
      affect the view to be interpreted by interested party. */
     public var padding = NSEdgeInsetsZero
     
+}
+
+public class TableViewSpecifier: ViewSpecifier {
+    public var intercellSpacing: NSSize?
+    public var separatorColor: NSColor?
+    
+    func apply(toTableView tableView: NSTableView) {
+        if let backgroundColor = backgroundColor {
+            tableView.backgroundColor = backgroundColor
+        }
+        if let separatorColor = separatorColor {
+            tableView.gridColor = separatorColor
+        }
+        if let intercellSpacing = intercellSpacing {
+            tableView.intercellSpacing = intercellSpacing
+        }
+        
+    }
 }
 
 public class DashedBorderSpecifier {
