@@ -176,6 +176,8 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
 @interface VSTextLabelSpecifier : NSObject
 
 @property (nonatomic, assign) UIFont *font;
+@property (nonatomic, assign) UIFont *boldFont;
+@property (nonatomic, assign) UIFont *italicFont;
 @property (nonatomic, assign) CGSize size;
 /** If YES, \c size should be ignored when creating a text label from it */
 @property (nonatomic, assign) BOOL sizeToFit;

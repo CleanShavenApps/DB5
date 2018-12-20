@@ -439,6 +439,14 @@ public class Theme: Equatable {
         
         let fontDictionary = self.dictionary(fromObject: dictionary["font"])
         labelSpecifier.font = self.font(fromDictionary: fontDictionary, sizeAdjustment: sizeAdjustment)
+		
+		if let boldFontDictionary = self.dictionary(fromObject: dictionary["boldFont"]) {
+			labelSpecifier.boldFont = self.font(fromDictionary: boldFontDictionary, sizeAdjustment: sizeAdjustment)
+		}
+		
+		if let italicFontDictionary = self.dictionary(fromObject: dictionary["italicFont"]) {
+			labelSpecifier.italicFont = self.font(fromDictionary: italicFontDictionary, sizeAdjustment: sizeAdjustment)
+		}
         
         let sizeDictionary = self.dictionary(fromObject: dictionary["size"])
         labelSpecifier.size = self.size(fromDictionary: sizeDictionary)

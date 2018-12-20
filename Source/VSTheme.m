@@ -574,6 +574,16 @@ static UIColor *colorWithHexString(NSString *hexString);
 	NSDictionary *fontDictionary = [self dictionaryFromObject:dictionary[@"font"]];
 	labelSpecifier.font = [self vs_fontFromDictionary:fontDictionary sizeAdjustment:sizeAdjustment];
 	
+	NSDictionary *boldFontDictionary = [self dictionaryFromObject:dictionary[@"boldFont"]];
+	if (boldFontDictionary) {
+		labelSpecifier.boldFont = [self vs_fontFromDictionary:boldFontDictionary sizeAdjustment:sizeAdjustment];
+	}
+	
+	NSDictionary *italicFontDictionary = [self dictionaryFromObject:dictionary[@"italicFont"]];
+	if (italicFontDictionary) {
+		labelSpecifier.italicFont = [self vs_fontFromDictionary:italicFontDictionary sizeAdjustment:sizeAdjustment];
+	}
+	
 	NSDictionary *sizeDictionary = [self dictionaryFromObject:dictionary[@"size"]];
 	labelSpecifier.size = [self vs_sizeFromDictionary:sizeDictionary];
 	
