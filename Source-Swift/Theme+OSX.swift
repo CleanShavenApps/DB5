@@ -51,6 +51,8 @@ class NavigationBarSpecifier {
 
 public class TextLabelSpecifier {
     var font: NSFont?
+	var boldFont: UIFont?
+	var italicFont: UIFont?
     var size = CGSize.zero
     /** If YES, \c size should be ignored when creating a text label from it */
     var sizeToFit: Bool = false
