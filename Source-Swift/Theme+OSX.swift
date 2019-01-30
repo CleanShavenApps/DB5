@@ -219,6 +219,11 @@ public class TextLabelSpecifier {
             label.sizeToFit()
         }
     }
+    
+    func apply(toTextView textView: NSTextView) {
+        textView.font = self.font
+        textView.textColor = self.color
+    }
 }
 
 public class ViewSpecifier {
