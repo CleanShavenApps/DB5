@@ -196,6 +196,34 @@ public class TextLabelSpecifier {
         return textAttributes
     }
     
+    func apply(toPlaceholderIn label: NSTextField) {
+        self.apply(toPlaceholderIn: label, withPlaceholder: nil)
+    }
+    
+    func apply(toPlaceholderIn label: NSTextField, withPlaceholder placeholder: String?) {
+        var placeholderText: String?
+        if let placeholder = placeholder {
+            placeholderText = placeholder
+        }
+        else {
+            placeholderText = label.placeholderString
+        }
+        
+        guard let text = placeholderText else {
+            return
+        }
+        
+        let attributedPlaceholderText = NSMutableAttributedString(string: text)
+        attributedPlaceholderText.addAttribute(.font, value: font!, range: NSMakeRange(0, text.count))
+        attributedPlaceholderText.addAttribute(.foregroundColor, value: color!, range: NSMakeRange(0, text.count))
+        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = alignment
+        attributedPlaceholderText.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSMakeRange(0, text.count))
+        
+        label.placeholderAttributedString = attributedPlaceholderText
+    }
+    
     func apply(toLabel label: NSTextField) {
         self.apply(toLabel: label, withText: nil)
     }
