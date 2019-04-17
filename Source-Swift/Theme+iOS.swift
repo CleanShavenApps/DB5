@@ -34,7 +34,7 @@ public extension Theme {
         return .curveEaseInOut
     }
     
-    public func animationSpecifier(forKey key: String) -> AnimationSpecifier? {
+    func animationSpecifier(forKey key: String) -> AnimationSpecifier? {
         let animationSpecifier = AnimationSpecifier()
         
         guard let animationDictionary = self.dictionary(forKey: key) else {
@@ -48,7 +48,7 @@ public extension Theme {
         return animationSpecifier
     }
     
-    public func statusBarStyle(forKey key: String) -> UIStatusBarStyle {
+    func statusBarStyle(forKey key: String) -> UIStatusBarStyle {
         let obj = self.object(forKey: key)
         return self.statusBarStyle(fromObject: obj)
     }
@@ -69,12 +69,12 @@ public extension Theme {
     }
     
     /** Where the possible values are extralight, light, dark, regular, prominent */
-    func blueEffectStyle(forKey key: String) -> UIBlurEffectStyle {
+    func blueEffectStyle(forKey key: String) -> UIBlurEffect.Style {
         let obj = self.object(forKey: key)
         return blurEffectStyle(fromObject: obj)
     }
     
-    private func blurEffectStyle(fromObject object: Any?) -> UIBlurEffectStyle {
+    private func blurEffectStyle(fromObject object: Any?) -> UIBlurEffect.Style {
         guard let blurEffectStyleString = self.string(fromObject: object)?.lowercased(), stringIsEmpty(s: blurEffectStyleString) == false else {
             return .extraLight
         }
@@ -96,12 +96,12 @@ public extension Theme {
     }
     
     /** Where the possible values are whitelarge, white, gray. Defaults to gray */
-    func activityIndicatorViewStyle(forKey key: String) -> UIActivityIndicatorViewStyle {
+    func activityIndicatorViewStyle(forKey key: String) -> UIActivityIndicatorView.Style {
         let obj = self.object(forKey: key)
         return activityIndicatorViewStyle(fromObject: obj)
     }
     
-    private func activityIndicatorViewStyle(fromObject object: Any?) -> UIActivityIndicatorViewStyle {
+    private func activityIndicatorViewStyle(fromObject object: Any?) -> UIActivityIndicatorView.Style {
         guard let barStyleString = string(fromObject: object)?.lowercased(), stringIsEmpty(s: barStyleString) == false else {
             return .gray
         }
@@ -138,7 +138,7 @@ public extension Theme {
         }
     }
     
-    public func keyboardAppearance(forKey key: String) -> UIKeyboardAppearance {
+    func keyboardAppearance(forKey key: String) -> UIKeyboardAppearance {
         let obj = self.object(forKey: key)
         return self.keyboardAppearance(fromObject: obj)
     }
@@ -157,12 +157,12 @@ public extension Theme {
         return .default
     }
     
-    public func navigationBarSpecifier(forKey key: String) -> NavigationBarSpecifier? {
+    func navigationBarSpecifier(forKey key: String) -> NavigationBarSpecifier? {
         return self.navigationBarSpecifier(forKey: key, sizeAdjustment:0)
     }
 
     
-    public func navigationBarSpecifier(forKey key: String, sizeAdjustment: Float) -> NavigationBarSpecifier? {
+    func navigationBarSpecifier(forKey key: String, sizeAdjustment: Float) -> NavigationBarSpecifier? {
         guard let cachedSpecifier = self.navigationBarSpecifierCache.object(forKey: key as NSString) else {
             
             let navigationBarSpecifier = NavigationBarSpecifier()
@@ -295,7 +295,7 @@ public extension Theme {
 //        return labelSpecifier
 //    }
     
-    public func dashedBorderSpecifier(forKey key: String) -> DashedBorderSpecifier? {
+	func dashedBorderSpecifier(forKey key: String) -> DashedBorderSpecifier? {
         guard let dictionary = self.dictionary(fromObject: key) else {
             return nil
         }
@@ -317,7 +317,7 @@ public extension Theme {
         return dashedBorderSpecifier
     }
     
-    public func textAlignment(forKey key: String) -> NSTextAlignment {
+	func textAlignment(forKey key: String) -> NSTextAlignment {
         let obj = self.object(forKey: key)
         return self.textAlignment(fromObject: obj)
     }
@@ -342,7 +342,7 @@ public extension Theme {
         return .left
     }
     
-    public func lineBreakMode(forKey key: String) -> NSLineBreakMode {
+	func lineBreakMode(forKey key: String) -> NSLineBreakMode {
         let obj = self.object(forKey: key)
         return self.lineBreakMode(fromObject: obj)
     }
@@ -377,7 +377,7 @@ public extension Theme {
 
 public extension Theme {
     
-    public func view(withViewSpecifierKey viewSpecifierKey: String) -> UIView {
+    func view(withViewSpecifierKey viewSpecifierKey: String) -> UIView {
         guard let viewSpecifier = self.viewSpecifier(forKey: viewSpecifierKey) else {
             fatalError("viewSpecifier is nil for key \(viewSpecifierKey)")
         }
@@ -387,18 +387,18 @@ public extension Theme {
         return view
     }
     
-    public func label(withText text: String, specifierKey labelSpecifierKey: String) -> UILabel {
+    func label(withText text: String, specifierKey labelSpecifierKey: String) -> UILabel {
         return self.label(withText: text, specifierKey: labelSpecifierKey, sizeAdjustment: 0)
     }
     
-    public func label(withText text: String, specifierKey labelSpecifierKey: String, sizeAdjustment: Float) -> UILabel {
+    func label(withText text: String, specifierKey labelSpecifierKey: String, sizeAdjustment: Float) -> UILabel {
         guard let textLabelSpecifier = self.textLabelSpecifier(forKey: labelSpecifierKey, sizeAdjustment: sizeAdjustment) else {
             fatalError("label is nil for key \(labelSpecifierKey)")
         }
         return textLabelSpecifier.label(withText: text)
     }
     
-    public func animate(withAnimationSpecifierKey animationSpecifierKey: String, animations:@escaping (() -> ()), completion:@escaping ((_ finished: Bool) -> ())) {
+    func animate(withAnimationSpecifierKey animationSpecifierKey: String, animations:@escaping (() -> ()), completion:@escaping ((_ finished: Bool) -> ())) {
         
         guard let animationSpecifier = self.animationSpecifier(forKey: animationSpecifierKey) else {
             fatalError("animation specifier is nil for key \(animationSpecifierKey)")
@@ -424,7 +424,7 @@ public class NavigationBarSpecifier {
     public var tintColor: UIColor?
     public var titleLabelSpecifier: TextLabelSpecifier?
     public var buttonsLabelSpecifier: TextLabelSpecifier?
-    public func apply(toNavigationBar navigationBar: UINavigationBar, containedInClass containingClass: UIAppearanceContainer.Type?) {
+    func apply(toNavigationBar navigationBar: UINavigationBar, containedInClass containingClass: UIAppearanceContainer.Type?) {
         
         if let barColor = self.barColor {
             navigationBar.barTintColor = barColor
@@ -525,13 +525,13 @@ public class TextLabelSpecifier {
     }
     
     private lazy var defaultTextLabelAttributes = {
-        return [NSAttributedStringKey.font,
-                NSAttributedStringKey.foregroundColor,
-                NSAttributedStringKey.backgroundColor,
-                NSAttributedStringKey.paragraphStyle]
+		return [NSAttributedString.Key.font,
+				NSAttributedString.Key.foregroundColor,
+                NSAttributedString.Key.backgroundColor,
+                NSAttributedString.Key.paragraphStyle]
     }()
     
-    func attributedString(withText text: String, forState state: UIControlState = .normal, generateMissingColorsUsingAlphaOfNormalColors alpha: CGFloat? = nil) -> NSAttributedString {
+	func attributedString(withText text: String, forState state: UIControl.State = .normal, generateMissingColorsUsingAlphaOfNormalColors alpha: CGFloat? = nil) -> NSAttributedString {
         
         var customForeground: UIColor?
         var customBackground: UIColor?
@@ -595,10 +595,10 @@ public class TextLabelSpecifier {
             NSAttributedString.Key.backgroundColor])
     }
     
-    func attributes(forKeys keys: [NSAttributedStringKey], customForegroundColor: UIColor? = nil, customBackgroundColor: UIColor? = nil) -> [NSAttributedStringKey: Any] {
-        var textAttributes: [NSAttributedStringKey: Any] = [:]
+	func attributes(forKeys keys: [NSAttributedString.Key], customForegroundColor: UIColor? = nil, customBackgroundColor: UIColor? = nil) -> [NSAttributedString.Key: Any] {
+        var textAttributes: [NSAttributedString.Key: Any] = [:]
         for key in keys {
-            if key == NSAttributedStringKey.paragraphStyle {
+            if key == NSAttributedString.Key.paragraphStyle {
                 if let paragraphStyle = NSMutableParagraphStyle.default.mutableCopy() as? NSMutableParagraphStyle {
                     
                     paragraphStyle.lineBreakMode = self.lineBreakMode
@@ -624,17 +624,17 @@ public class TextLabelSpecifier {
                     textAttributes[key] = paragraphStyle
                 }
             }
-            else if key == NSAttributedStringKey.font {
+            else if key == NSAttributedString.Key.font {
                 if let font = self.font {
                     textAttributes[key] = font
                 }
             }
-            else if key == NSAttributedStringKey.foregroundColor {
+            else if key == NSAttributedString.Key.foregroundColor {
                 if let color = customForegroundColor ?? self.color {
                     textAttributes[key] = color
                 }
             }
-            else if key == NSAttributedStringKey.backgroundColor {
+            else if key == NSAttributedString.Key.backgroundColor {
                 if let backgroundColor =  customBackgroundColor ?? self.backgroundColor {
                     textAttributes[key] = backgroundColor
                 }
@@ -671,7 +671,7 @@ public class TextLabelSpecifier {
         }
     }
     
-    func apply(toButton button: UIButton, title: String, states: [UIControlState]) {
+    func apply(toButton button: UIButton, title: String, states: [UIControl.State]) {
         for state in states {
             let attributedTitle = attributedString(withText: title, forState: state)
             button.setAttributedTitle(attributedTitle, for: state)

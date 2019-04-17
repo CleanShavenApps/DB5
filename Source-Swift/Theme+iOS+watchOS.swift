@@ -12,7 +12,7 @@ public extension Theme {
     
     // MARK: Advanced Data Types
     
-    public func image(forKey key:String) -> UIImage? {
+	func image(forKey key:String) -> UIImage? {
         guard let imageName = self.string(forKey: key) else {
             return nil
         }
@@ -34,7 +34,7 @@ public class ViewSpecifier {
      affect the view to be interpreted by interested party. */
     public var padding = UIEdgeInsets.zero
     
-    public func backgroundColor(forState state: UIControlState) -> UIColor? {
+	public func backgroundColor(forState state: UIControl.State) -> UIColor? {
         switch state {
         case .normal:
             return backgroundColor
