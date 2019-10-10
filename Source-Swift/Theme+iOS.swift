@@ -302,7 +302,10 @@ public extension Theme {
         
         let dashedBorderSpecifier = DashedBorderSpecifier()
         
-        if let colorDictionary = self.dictionary(fromObject: dictionary["color"]) {
+        if let colorPath = self.string(fromObject: dictionary["color"]), let colorDictionary = self.dictionary(forKey: colorPath) {
+            dashedBorderSpecifier.color = self.color(fromDictionary: colorDictionary)
+        }
+        else if let colorDictionary = self.dictionary(fromObject: dictionary["color"]) {
             dashedBorderSpecifier.color = self.color(fromDictionary: colorDictionary)
         }
         

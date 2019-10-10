@@ -33,11 +33,18 @@ public extension Theme {
         viewSpecifier.intercellSpacing
             = self.size(fromDictionary: sizeDictionary)
         
-        if let backgroundColorDictionary = self.dictionary(fromObject: dictionary["backgroundColor"]) {
+        
+        if let path = self.string(fromObject: dictionary["backgroundColor"]), let dictionary = self.dictionary(forKey: path) {
+            viewSpecifier.backgroundColor = self.color(fromDictionary: dictionary)
+        }
+        else if let backgroundColorDictionary = self.dictionary(fromObject: dictionary["backgroundColor"]) {
             viewSpecifier.backgroundColor = self.color(fromDictionary: backgroundColorDictionary)
         }
 
-        if let separatorColorDictionary = self.dictionary(fromObject: dictionary["separatorColor"]) {
+        if let path = self.string(fromObject: dictionary["separatorColor"]), let dictionary = self.dictionary(forKey: path) {
+            viewSpecifier.separatorColor = self.color(fromDictionary: dictionary)
+        }
+        else if let separatorColorDictionary = self.dictionary(fromObject: dictionary["separatorColor"]) {
             viewSpecifier.separatorColor = self.color(fromDictionary: separatorColorDictionary)
         }
 
