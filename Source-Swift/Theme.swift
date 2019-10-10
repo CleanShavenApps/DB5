@@ -107,11 +107,17 @@ public class Theme: Equatable {
     }
     
     public func dictionary(forKey key: String) -> [String: Any]? {
+        if let path = self.string(forKey: key), let dictionary = self.dictionary(forKey: path) {
+            return dictionary
+        }
         let obj = self.object(forKey: key) as? [String: Any]
         return obj
     }
     
     public func dictionary(fromObject object:Any?) -> [String: Any]? {
+        if let key = object as? String, let dictionary = self.dictionary(forKey: key) {
+            return dictionary
+        }
         return object as? [String: Any]
     }
     
@@ -262,6 +268,7 @@ public class Theme: Equatable {
     
     public func font(forKey key:String, sizeAdjustment: Float) -> Font {
         let cacheKey = key.appendingFormat("_%.2f", sizeAdjustment)
+        print("...\(cacheKey)")
         guard let cachedFont = self.fontCache.object(forKey: cacheKey as NSString) else {
             let fontDictionary = self.dictionary(forKey: key)
             let font = self.font(fromDictionary: fontDictionary, sizeAdjustment: sizeAdjustment)
