@@ -145,6 +145,11 @@ public class Theme: Equatable {
             return nil
         }
         if let object = object as? String {
+            // if object is a string,
+            // find out if this is a path that leads to another string
+            if object.contains("."), let nestedObject = self.string(forKey: object) {
+                return nestedObject
+            }
             return object
         }
         else if let object = object as? NSNumber {
@@ -291,11 +296,6 @@ public class Theme: Equatable {
         if let fontName = fontName {
             if stringIsEmpty(s: fontName) {
                 font = Font.systemFont(ofSize: fontSize)
-            }
-            else if fontName.contains(".") {
-                if let newFontName = self.string(forKey: fontName) {
-                    font = Font(name: newFontName, size: fontSize)
-                }
             }
             else {
                 font = Font(name: fontName, size: fontSize)
