@@ -273,6 +273,11 @@ public class Theme: Equatable {
             if stringIsEmpty(s: fontName) {
                 font = Font.systemFont(ofSize: fontSize)
             }
+            else if fontName.contains(".") {
+                if let newFontName = self.string(forKey: fontName) {
+                    font = Font(name: newFontName, size: fontSize)
+                }
+            }
             else {
                 font = Font(name: fontName, size: fontSize)
             }
