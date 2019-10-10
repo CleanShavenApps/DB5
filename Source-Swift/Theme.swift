@@ -239,22 +239,11 @@ public class Theme: Equatable {
         
         var color: Color?
         let alphaObject = dictionary["alpha"]
-        if let hexString = dictionary["hex"] as? String {
-            // check the value is a path
-            if hexString.contains(".") {
-                let pathHexString = self.string(forKey: hexString)
-                color = colorWithHexString(hexString: pathHexString)
-                if let alphaObject = alphaObject {
-                    let alpha = self.float(fromObject: alphaObject)
-                    color = color?.withAlphaComponent(CGFloat(alpha))
-                }
-            }
-            else {
-                color = colorWithHexString(hexString: hexString)
-                if let alphaObject = alphaObject {
-                    let alpha = self.float(fromObject: alphaObject)
-                    color = color?.withAlphaComponent(CGFloat(alpha))
-                }
+        if let hexString = self.string(fromObject: dictionary["hex"]) {
+            color = colorWithHexString(hexString: hexString)
+            if let alphaObject = alphaObject {
+                let alpha = self.float(fromObject: alphaObject)
+                color = color?.withAlphaComponent(CGFloat(alpha))
             }
         }
         else if let alphaObject = alphaObject {
