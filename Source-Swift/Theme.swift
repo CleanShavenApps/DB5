@@ -268,7 +268,6 @@ public class Theme: Equatable {
     
     public func font(forKey key:String, sizeAdjustment: Float) -> Font {
         let cacheKey = key.appendingFormat("_%.2f", sizeAdjustment)
-        print("...\(cacheKey)")
         guard let cachedFont = self.fontCache.object(forKey: cacheKey as NSString) else {
             let fontDictionary = self.dictionary(forKey: key)
             let font = self.font(fromDictionary: fontDictionary, sizeAdjustment: sizeAdjustment)
@@ -376,24 +375,15 @@ public class Theme: Equatable {
         let positionDictionary = self.dictionary(fromObject: dictionary["position"])
         viewSpecifier.position = self.point(fromDictionary: positionDictionary)
         
-        if let path = self.string(fromObject: dictionary["backgroundColor"]), let dictionary = self.dictionary(forKey: path) {
-            viewSpecifier.backgroundColor = self.color(fromDictionary: dictionary)
-        }
-        else if let backgroundColorDictionary = self.dictionary(fromObject: dictionary["backgroundColor"]) {
+        if let backgroundColorDictionary = self.dictionary(fromObject: dictionary["backgroundColor"]) {
             viewSpecifier.backgroundColor = self.color(fromDictionary: backgroundColorDictionary)
         }
         
-        if let path = self.string(fromObject: dictionary["highlightedBackgroundColor"]), let dictionary = self.dictionary(forKey: path) {
-            viewSpecifier.highlightedBackgroundColor = self.color(fromDictionary: dictionary)
-        }
-        else if let highlightedBackgroundColorDictionary = self.dictionary(fromObject: dictionary["highlightedBackgroundColor"]) {
+        if let highlightedBackgroundColorDictionary = self.dictionary(fromObject: dictionary["highlightedBackgroundColor"]) {
             viewSpecifier.highlightedBackgroundColor = self.color(fromDictionary: highlightedBackgroundColorDictionary)
         }
 		
-        if let path = self.string(fromObject: dictionary["disabledBackgroundColor"]), let dictionary = self.dictionary(forKey: path) {
-            viewSpecifier.disabledBackgroundColor = self.color(fromDictionary: dictionary)
-        }
-		else if let disabledBackgroundColorDictionary = self.dictionary(fromObject: dictionary["disabledBackgroundColor"]) {
+        if let disabledBackgroundColorDictionary = self.dictionary(fromObject: dictionary["disabledBackgroundColor"]) {
 			viewSpecifier.disabledBackgroundColor = self.color(fromDictionary: disabledBackgroundColorDictionary)
 		}
         
@@ -520,45 +510,27 @@ public class Theme: Equatable {
         let textTransformString = self.string(fromObject: dictionary["textTransform"])
         labelSpecifier.textTransform = self.textCaseTransform(fromString: textTransformString)
         
-        if let colorPath = self.string(fromObject: dictionary["color"]), let colorDictionary = self.dictionary(forKey: colorPath) {
-            labelSpecifier.color = self.color(fromDictionary: colorDictionary)
-        }
-        else if let colorDictionary = self.dictionary(fromObject: dictionary["color"]) {
+        if let colorDictionary = self.dictionary(fromObject: dictionary["color"]) {
             labelSpecifier.color = self.color(fromDictionary: colorDictionary)
         }
         
-        if let colorPath = self.string(fromObject: dictionary["highlightedColor"]), let highlightedColorDictionary = self.dictionary(forKey: colorPath) {
-            labelSpecifier.highlightedColor = self.color(fromDictionary: highlightedColorDictionary)
-        }
-        else if let highlightedColorDictionary = self.dictionary(fromObject: dictionary["highlightedColor"]) {
+        if let highlightedColorDictionary = self.dictionary(fromObject: dictionary["highlightedColor"]) {
             labelSpecifier.highlightedColor = self.color(fromDictionary: highlightedColorDictionary)
         }
         
-        if let colorPath = self.string(fromObject: dictionary["disabledColor"]), let disabledColorDictionary = self.dictionary(forKey: colorPath) {
-            labelSpecifier.disabledColor = self.color(fromDictionary: disabledColorDictionary)
-        }
-        else if let disabledColorDictionary = self.dictionary(fromObject: dictionary["disabledColor"]) {
+        if let disabledColorDictionary = self.dictionary(fromObject: dictionary["disabledColor"]) {
             labelSpecifier.disabledColor = self.color(fromDictionary: disabledColorDictionary)
         }
         
-        if let colorPath = self.string(fromObject: dictionary["backgroundColor"]), let backgroundColorDictionary = self.dictionary(forKey: colorPath) {
-            labelSpecifier.backgroundColor = self.color(fromDictionary: backgroundColorDictionary)
-        }
-        else if let backgroundColorDictionary = self.dictionary(fromObject: dictionary["backgroundColor"]) {
+        if let backgroundColorDictionary = self.dictionary(fromObject: dictionary["backgroundColor"]) {
             labelSpecifier.backgroundColor = self.color(fromDictionary: backgroundColorDictionary)
         }
         
-        if let colorPath = self.string(fromObject: dictionary["highlightedBackgroundColor"]), let highlightedBackgroundColorDictionary = self.dictionary(forKey: colorPath) {
-            labelSpecifier.highlightedBackgroundColor = self.color(fromDictionary: highlightedBackgroundColorDictionary)
-        }
-        else if let highlightedBackgroundColorDictionary = self.dictionary(fromObject: dictionary["highlightedBackgroundColor"]) {
+        if let highlightedBackgroundColorDictionary = self.dictionary(fromObject: dictionary["highlightedBackgroundColor"]) {
             labelSpecifier.highlightedBackgroundColor = self.color(fromDictionary: highlightedBackgroundColorDictionary)
         }
         
-        if let colorPath = self.string(fromObject: dictionary["disabledBackgroundColor"]), let disabledBackgroundColorDictionary = self.dictionary(forKey: colorPath) {
-            labelSpecifier.disabledBackgroundColor = self.color(fromDictionary: disabledBackgroundColorDictionary)
-        }
-        else if let disabledBackgroundColorDictionary = self.dictionary(fromObject: dictionary["disabledBackgroundColor"]) {
+        if let disabledBackgroundColorDictionary = self.dictionary(fromObject: dictionary["disabledBackgroundColor"]) {
             labelSpecifier.disabledBackgroundColor = self.color(fromDictionary: disabledBackgroundColorDictionary)
         }
         
