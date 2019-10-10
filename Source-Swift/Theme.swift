@@ -253,6 +253,15 @@ public class Theme: Equatable {
             }
         }
         
+        if let darkerObject = dictionary["darker"] {
+            let darker = self.float(fromObject: darkerObject)
+            color = color?.darker(amount: CGFloat(darker))
+        }
+        else if let lighterObject = dictionary["lighter"] {
+            let lighter = self.float(fromObject: lighterObject)
+            color = color?.lighter(amount: CGFloat(lighter))
+        }
+        
         if color == nil {
             color = Color.black
         }
