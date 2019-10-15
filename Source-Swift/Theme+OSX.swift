@@ -9,6 +9,14 @@
 import Cocoa
 
 public extension Theme {
+    
+    func appearance() -> NSAppearance.Name {
+        guard let appearanceName = self.string(forKey: "appearance") else {
+            return NSAppearance.Name.aqua
+        }
+        let appearance = NSAppearance.Name(appearanceName)
+        return appearance
+    }
 
     func tableViewSpecifier(forKey key: String) -> TableViewSpecifier? {
         guard let cachedSpecifier = self.viewSpecifierCache.object(forKey: key as NSString) as? TableViewSpecifier else {
