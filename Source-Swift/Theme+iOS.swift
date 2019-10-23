@@ -93,11 +93,13 @@ public extension Theme {
         }
 	}
 	
+	@available(iOSApplicationExtension 12.0, *)
 	func userInterfaceStyle(forKey key: String) -> UIUserInterfaceStyle {
 		let obj = self.object(forKey: key)
         return self.userInterfaceStyle(fromObject: obj)
 	}
 	
+	@available(iOSApplicationExtension 12.0, *)
 	private func userInterfaceStyle(fromObject object: Any?) -> UIUserInterfaceStyle {
         guard let userInterfaceStyleString = self.string(fromObject: object)?.lowercased(), stringIsEmpty(s: userInterfaceStyleString) == false else {
             return .unspecified
