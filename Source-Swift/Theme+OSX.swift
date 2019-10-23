@@ -10,7 +10,7 @@ import Cocoa
 
 public extension Theme {
 
-    public func tableViewSpecifier(forKey key: String) -> TableViewSpecifier? {
+    func tableViewSpecifier(forKey key: String) -> TableViewSpecifier? {
         guard let cachedSpecifier = self.viewSpecifierCache.object(forKey: key as NSString) as? TableViewSpecifier else {
             let dictionary = self.dictionary(forKey: key)
             let viewSpecifier = self.tableViewSpecifier(fromDictionary: dictionary)

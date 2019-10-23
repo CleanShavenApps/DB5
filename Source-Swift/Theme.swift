@@ -220,10 +220,17 @@ public class Theme: Equatable {
         var color: Color?
         let alphaObject = dictionary["alpha"]
         if let hexString = dictionary["hex"] as? String {
-            color = colorWithHexString(hexString: hexString)
-            if let alphaObject = alphaObject {
-                let alpha = self.float(fromObject: alphaObject)
-                color = color?.withAlphaComponent(CGFloat(alpha))
+            // check the value is a path
+            if hexString.contains(".") {
+                let colorDictionary = self.dictionary(forKey: hexString)
+                color = self.color(fromDictionary: colorDictionary)
+            }
+            else {
+                color = colorWithHexString(hexString: hexString)
+                if let alphaObject = alphaObject {
+                    let alpha = self.float(fromObject: alphaObject)
+                    color = color?.withAlphaComponent(CGFloat(alpha))
+                }
             }
         }
         else if let alphaObject = alphaObject {
