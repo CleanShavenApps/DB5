@@ -80,6 +80,12 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
 /** Where the possible values are darkcontent, lightcontent */
 - (UIStatusBarStyle)statusBarStyleForKey:(NSString *)key;
 
+/** Where the possible values are white, black */
+- (UIScrollViewIndicatorStyle)scrollViewIndicatorStyleForKey:(NSString *)key;
+
+/** Where the possible values are light, dark */
+- (UIUserInterfaceStyle)userInterfaceStyleForKey:(NSString *)key API_AVAILABLE(ios(12.0));
+
 /** Where the possible values are extralight, light, dark, regular, prominent */
 - (UIBlurEffectStyle)blurEffectStyleForKey:(NSString *)key;
 

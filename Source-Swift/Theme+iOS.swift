@@ -60,13 +60,58 @@ public extension Theme {
         
         switch statusBarStyleString {
         case "darkcontent":
-            return .default
+			if #available(iOSApplicationExtension 13.0, *) {
+				return .darkContent
+			} else {
+				// Fallback on earlier versions
+				return .default
+			}
         case "lightcontent":
             return .lightContent
         default:
             return .default
         }
     }
+	
+	func scrollViewIndicatorStyle(forKey key: String) -> UIScrollView.IndicatorStyle {
+		let obj = self.object(forKey: key)
+        return self.scrollViewIndicatorStyle(fromObject: obj)
+	}
+	
+	private func scrollViewIndicatorStyle(fromObject object: Any?) -> UIScrollView.IndicatorStyle {
+        guard let scrollViewIndicatorStyleString = self.string(fromObject: object)?.lowercased(), stringIsEmpty(s: scrollViewIndicatorStyleString) == false else {
+            return .default
+        }
+        
+        switch scrollViewIndicatorStyleString {
+        case "white":
+			return .default
+        case "black":
+            return .black
+        default:
+            return .default
+        }
+	}
+	
+	func userInterfaceStyle(forKey key: String) -> UIUserInterfaceStyle {
+		let obj = self.object(forKey: key)
+        return self.userInterfaceStyle(fromObject: obj)
+	}
+	
+	private func userInterfaceStyle(fromObject object: Any?) -> UIUserInterfaceStyle {
+        guard let userInterfaceStyleString = self.string(fromObject: object)?.lowercased(), stringIsEmpty(s: userInterfaceStyleString) == false else {
+            return .unspecified
+        }
+        
+        switch userInterfaceStyleString {
+        case "light":
+			return .light
+        case "dark":
+            return .dark
+        default:
+            return .unspecified
+        }
+	}
     
     /** Where the possible values are extralight, light, dark, regular, prominent */
     func blueEffectStyle(forKey key: String) -> UIBlurEffect.Style {

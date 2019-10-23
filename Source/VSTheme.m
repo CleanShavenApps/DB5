@@ -752,13 +752,66 @@ static UIColor *colorWithHexString(NSString *hexString);
 	
 	if (!stringIsEmpty(statusBarStyleString)) {
 		statusBarStyleString = [statusBarStyleString lowercaseString];
-		if ([statusBarStyleString isEqualToString:@"darkcontent"])
-			return UIStatusBarStyleDefault;
-		else if ([statusBarStyleString isEqualToString:@"lightcontent"])
+		if ([statusBarStyleString isEqualToString:@"darkcontent"]) {
+			if (@available(iOS 13.0, *)) {
+				return UIStatusBarStyleDarkContent;
+			} else {
+				// Fallback on earlier versions
+				return UIStatusBarStyleDefault;
+			}
+		}
+		else if ([statusBarStyleString isEqualToString:@"lightcontent"]) {
 			return UIStatusBarStyleLightContent;
+		}
 	}
     
 	return UIStatusBarStyleDefault;
+}
+
+
+- (UIScrollViewIndicatorStyle)scrollViewIndicatorStyleForKey:(NSString *)key {
+	
+	id obj = [self objectForKey:key];
+	return [self vs_scrollViewIndicatorStyleFromObject:obj];
+}
+
+
+- (UIScrollViewIndicatorStyle)vs_scrollViewIndicatorStyleFromObject:(id)obj {
+	
+	NSString *scrollViewIndicatorStyleString = [self vs_stringFromObject:obj];
+	
+	if (!stringIsEmpty(scrollViewIndicatorStyleString)) {
+		scrollViewIndicatorStyleString = [scrollViewIndicatorStyleString lowercaseString];
+		if ([scrollViewIndicatorStyleString isEqualToString:@"white"])
+			return UIScrollViewIndicatorStyleWhite;
+		else if ([scrollViewIndicatorStyleString isEqualToString:@"black"])
+			return UIScrollViewIndicatorStyleBlack;
+	}
+    
+	return UIScrollViewIndicatorStyleDefault;
+}
+
+
+- (UIUserInterfaceStyle)userInterfaceStyleForKey:(NSString *)key {
+	
+	id obj = [self objectForKey:key];
+	return [self vs_userInterfaceStyleFromObject:obj];
+}
+
+
+- (UIUserInterfaceStyle)vs_userInterfaceStyleFromObject:(id)obj API_AVAILABLE(ios(12.0)) {
+    
+	NSString *userInterfaceStyleString = [self vs_stringFromObject:obj];
+	
+	if (!stringIsEmpty(userInterfaceStyleString)) {
+		userInterfaceStyleString = [userInterfaceStyleString lowercaseString];
+		if ([userInterfaceStyleString isEqualToString:@"light"])
+			return UIUserInterfaceStyleLight;
+		else if ([userInterfaceStyleString isEqualToString:@"dark"])
+			return UIUserInterfaceStyleDark;
+	}
+    
+	return UIUserInterfaceStyleUnspecified;
 }
 
 
