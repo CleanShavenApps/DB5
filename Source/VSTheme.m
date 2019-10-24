@@ -13,6 +13,9 @@ static BOOL stringIsEmpty(NSString *s);
 static UIColor *colorWithHexString(NSString *hexString);
 
 @interface VSTextLabelSpecifier ()
+// Private
+// Cached dynamic color
+@property (nonatomic, copy) UIColor *dynamicColor;
 // Redeclare for accessors
 @property (nonatomic, strong) NSDictionary *attributes;
 @end
@@ -618,6 +621,10 @@ static UIColor *colorWithHexString(NSString *hexString);
 	NSDictionary *colorDictionary = [self dictionaryFromObject:dictionary[@"color"]];
 	if (colorDictionary)
 		labelSpecifier.color = [self vs_colorFromDictionary:colorDictionary];
+	
+	NSDictionary *darkColorDictionary = [self dictionaryFromObject:dictionary[@"darkColor"]];
+	if (darkColorDictionary)
+		labelSpecifier.darkColor = [self vs_colorFromDictionary:darkColorDictionary];
 	
 	NSDictionary *highlightedColorDictionary = [self dictionaryFromObject:dictionary[@"highlightedColor"]];
 	if (highlightedColorDictionary)
@@ -1340,8 +1347,30 @@ static UIColor *colorWithHexString(NSString *hexString);
 	label.textAlignment = self.alignment;
 	label.numberOfLines = self.numberOfLines;
 	
-	if (self.color)
-		label.textColor = self.color;
+	UIColor *textColor = self.color;
+	if (@available(iOS 13.0, *)) {
+		if (self.dynamicColor) {
+			textColor = self.dynamicColor;
+		} else if (self.color && self.darkColor) {
+			UIColor *lightColor = self.color;
+			UIColor *darkColor = self.darkColor;
+			self.dynamicColor = [[UIColor alloc] initWithDynamicProvider:^UIColor * _Nonnull(UITraitCollection * _Nonnull traitCollection) {
+				switch (traitCollection.userInterfaceStyle) {
+					case UIUserInterfaceStyleDark:
+						return darkColor;
+						break;
+						
+					default:
+						return lightColor;
+						break;
+				}
+			}];
+			textColor = self.dynamicColor;
+		}
+	}
+	
+	if (textColor)
+		label.textColor = textColor;
 	
 	if (self.backgroundColor)
 		label.backgroundColor = self.backgroundColor;

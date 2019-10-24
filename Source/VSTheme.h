@@ -207,6 +207,7 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
 @property (nonatomic, assign) NSLineBreakMode lineBreakMode;
 @property (nonatomic, assign) VSTextCaseTransform textTransform;
 @property (nonatomic, copy) UIColor *color;
+@property (nonatomic, copy) UIColor *darkColor;
 @property (nonatomic, copy) UIColor *highlightedColor;
 @property (nonatomic, copy) UIColor *disabledColor;
 @property (nonatomic, copy) UIColor *backgroundColor;

@@ -489,6 +489,10 @@ public class Theme: Equatable {
         if let colorDictionary = self.dictionary(fromObject: dictionary["color"]) {
             labelSpecifier.color = self.color(fromDictionary: colorDictionary)
         }
+		
+		if let darkColorDictionary = self.dictionary(fromObject: dictionary["darkColor"]) {
+			labelSpecifier.darkColor = self.color(fromDictionary: darkColorDictionary)
+		}
         
         if let highlightedColorDictionary = self.dictionary(fromObject: dictionary["highlightedColor"]) {
             labelSpecifier.highlightedColor = self.color(fromDictionary: highlightedColorDictionary)

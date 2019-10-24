@@ -530,6 +530,9 @@ public class TextLabelSpecifier {
     var textTransform: TextCaseTransform = .none
     
     var color: UIColor?
+	var darkColor: UIColor?
+	private var dynamicColor: UIColor? // Cached dynamic color
+	
     var highlightedColor: UIColor?
     var disabledColor: UIColor?
     
@@ -707,9 +710,28 @@ public class TextLabelSpecifier {
         }
         label.textAlignment = self.alignment
         label.numberOfLines = self.numberOfLines
-        if let color = self.color {
-            label.textColor = color
-        }
+
+		var textColor = self.color
+		if #available(iOSApplicationExtension 13.0, *) {
+			if let color = dynamicColor {
+				textColor = color
+			} else if let color = self.color, let darkColor = self.darkColor {
+				dynamicColor = UIColor(dynamicProvider: { traitCollection -> UIColor in
+					switch traitCollection.userInterfaceStyle {
+					case .dark:
+						return darkColor
+					default:
+						return color
+					}
+				})
+				textColor = dynamicColor
+			}
+		}
+		
+		if let color = textColor {
+			label.textColor = color
+		}
+		
         if let backgroundColor = self.backgroundColor {
             label.backgroundColor = backgroundColor
         }
