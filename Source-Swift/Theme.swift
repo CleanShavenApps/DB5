@@ -499,6 +499,13 @@ public class Theme: Equatable {
         
         labelSpecifier.lineSpacingMultiple = self.float(fromObject: dictionary["lineSpacingMultiple"])
         
+        if let lineHeightMultiple = dictionary["lineHeightMultiple"] {
+            labelSpecifier.lineHeightMultiple = self.float(fromObject: lineHeightMultiple)
+        }
+        else {
+            labelSpecifier.lineHeightMultiple = 1
+        }
+        
         let alignmentString = self.string(fromObject: dictionary["alignment"])
         labelSpecifier.alignment = self.textAlignment(fromObject: alignmentString)
         

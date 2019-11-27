@@ -79,6 +79,8 @@ public class TextLabelSpecifier {
     /// Line spacing affect line breaks (\u2028), while paragraph spacing affects paragraph breaks (\u2029). The line spacing is calculated with the font.pointSize multipled by lineSpacingMultiple.
     var lineSpacingMultiple: Float = 0
     
+    var lineHeightMultiple: Float = 1
+    
     var alignment: NSTextAlignment = .left
     var lineBreakMode: NSLineBreakMode = .byWordWrapping
     var textTransform: TextCaseTransform = .none
@@ -178,6 +180,7 @@ public class TextLabelSpecifier {
                     if self.lineSpacingMultiple>0, let font = self.font {
                         paragraphStyle.lineSpacing = font.pointSize * CGFloat(self.lineSpacingMultiple)
                     }
+                    paragraphStyle.lineHeightMultiple = CGFloat(self.lineHeightMultiple)
                     
                     textAttributes[key] = paragraphStyle
                 }
@@ -239,7 +242,7 @@ public class TextLabelSpecifier {
     
     func apply(toLabel label: NSTextField, withText text: String?) {
         if let text = text {
-            label.stringValue = self.transform(text: text)
+            label.attributedStringValue = attributedString(withText: text)
         }
         if let font = self.font {
             label.font = font
