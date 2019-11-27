@@ -176,10 +176,20 @@ public class Theme: Equatable {
     }
     
     internal func float(fromObject object: Any?) -> Float {
-        guard let object = object as? NSNumber else {
+        
+        if let object = object as? String {
+            // if object is a string,
+            // find out if this is a path that leads to another string
+            if object.contains(".") {
+                let nestedObject = self.float(forKey: object)
+                return nestedObject
+            }
             return 0
         }
-        return object.floatValue
+        else if let object = object as? NSNumber {
+            return object.floatValue
+        }
+        return 0
     }
     
     public func timeInterval(forKey key:String) -> TimeInterval {
