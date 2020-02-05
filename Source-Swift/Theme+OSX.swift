@@ -17,6 +17,21 @@ public extension Theme {
         let appearance = NSAppearance.Name(appearanceName)
         return appearance
     }
+    
+    func scrollerKnobStyle(forKey key: String) -> NSScroller.KnobStyle {
+        guard let stringStyle = self.string(forKey: key) else {
+            return .default
+        }
+        if stringStyle == "dark" {
+            return .dark
+        }
+        else if stringStyle == "light" {
+            return .light
+        }
+        else {
+            return .default
+        }
+    }
 
     func tableViewSpecifier(forKey key: String) -> TableViewSpecifier? {
         guard let cachedSpecifier = self.viewSpecifierCache.object(forKey: key as NSString) as? TableViewSpecifier else {
