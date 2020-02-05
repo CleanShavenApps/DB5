@@ -349,7 +349,10 @@ public extension Theme {
         
         let dashedBorderSpecifier = DashedBorderSpecifier()
         
-        if let colorDictionary = self.dictionary(fromObject: dictionary["color"]) {
+        if let colorPath = self.string(fromObject: dictionary["color"]), let colorDictionary = self.dictionary(forKey: colorPath) {
+            dashedBorderSpecifier.color = self.color(fromDictionary: colorDictionary)
+        }
+        else if let colorDictionary = self.dictionary(fromObject: dictionary["color"]) {
             dashedBorderSpecifier.color = self.color(fromDictionary: colorDictionary)
         }
         
@@ -524,6 +527,8 @@ public class TextLabelSpecifier {
     
     /// Line spacing affect line breaks (\u2028), while paragraph spacing affects paragraph breaks (\u2029). The line spacing is calculated with the font.pointSize multipled by lineSpacingMultiple.
     var lineSpacingMultiple: Float = 0
+    
+    var lineHeightMultiple: Float = 1
     
     var alignment: NSTextAlignment = .left
     var lineBreakMode: NSLineBreakMode = .byWordWrapping
@@ -702,6 +707,7 @@ public class TextLabelSpecifier {
     }
     
     func apply(toLabel label: UILabel, withText text: String?) {
+        
         if let text = text {
             label.text = self.transform(text: text)
         }

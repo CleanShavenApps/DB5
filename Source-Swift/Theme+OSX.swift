@@ -9,6 +9,29 @@
 import Cocoa
 
 public extension Theme {
+    
+    func appearance() -> NSAppearance.Name {
+        guard let appearanceName = self.string(forKey: "appearance") else {
+            return NSAppearance.Name.aqua
+        }
+        let appearance = NSAppearance.Name(appearanceName)
+        return appearance
+    }
+    
+    func scrollerKnobStyle(forKey key: String) -> NSScroller.KnobStyle {
+        guard let stringStyle = self.string(forKey: key) else {
+            return .default
+        }
+        if stringStyle == "dark" {
+            return .dark
+        }
+        else if stringStyle == "light" {
+            return .light
+        }
+        else {
+            return .default
+        }
+    }
 
     func tableViewSpecifier(forKey key: String) -> TableViewSpecifier? {
         guard let cachedSpecifier = self.viewSpecifierCache.object(forKey: key as NSString) as? TableViewSpecifier else {
@@ -32,6 +55,7 @@ public extension Theme {
         let sizeDictionary = self.dictionary(fromObject: dictionary["intercellSpacing"])
         viewSpecifier.intercellSpacing
             = self.size(fromDictionary: sizeDictionary)
+        
         
         if let backgroundColorDictionary = self.dictionary(fromObject: dictionary["backgroundColor"]) {
             viewSpecifier.backgroundColor = self.color(fromDictionary: backgroundColorDictionary)
@@ -69,6 +93,8 @@ public class TextLabelSpecifier {
     
     /// Line spacing affect line breaks (\u2028), while paragraph spacing affects paragraph breaks (\u2029). The line spacing is calculated with the font.pointSize multipled by lineSpacingMultiple.
     var lineSpacingMultiple: Float = 0
+    
+    var lineHeightMultiple: Float = 1
     
     var alignment: NSTextAlignment = .left
     var lineBreakMode: NSLineBreakMode = .byWordWrapping
@@ -169,6 +195,7 @@ public class TextLabelSpecifier {
                     if self.lineSpacingMultiple>0, let font = self.font {
                         paragraphStyle.lineSpacing = font.pointSize * CGFloat(self.lineSpacingMultiple)
                     }
+                    paragraphStyle.lineHeightMultiple = CGFloat(self.lineHeightMultiple)
                     
                     textAttributes[key] = paragraphStyle
                 }
@@ -230,7 +257,7 @@ public class TextLabelSpecifier {
     
     func apply(toLabel label: NSTextField, withText text: String?) {
         if let text = text {
-            label.stringValue = self.transform(text: text)
+            label.attributedStringValue = attributedString(withText: text)
         }
         if let font = self.font {
             label.font = font

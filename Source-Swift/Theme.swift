@@ -107,11 +107,17 @@ public class Theme: Equatable {
     }
     
     public func dictionary(forKey key: String) -> [String: Any]? {
+        if let path = self.string(forKey: key), let dictionary = self.dictionary(forKey: path) {
+            return dictionary
+        }
         let obj = self.object(forKey: key) as? [String: Any]
         return obj
     }
     
     public func dictionary(fromObject object:Any?) -> [String: Any]? {
+        if let key = object as? String, let dictionary = self.dictionary(forKey: key) {
+            return dictionary
+        }
         return object as? [String: Any]
     }
     
@@ -139,6 +145,11 @@ public class Theme: Equatable {
             return nil
         }
         if let object = object as? String {
+            // if object is a string,
+            // find out if this is a path that leads to another string
+            if object.contains("."), let nestedObject = self.string(forKey: object) {
+                return nestedObject
+            }
             return object
         }
         else if let object = object as? NSNumber {
@@ -165,10 +176,20 @@ public class Theme: Equatable {
     }
     
     internal func float(fromObject object: Any?) -> Float {
-        guard let object = object as? NSNumber else {
+        
+        if let object = object as? String {
+            // if object is a string,
+            // find out if this is a path that leads to another string
+            if object.contains(".") {
+                let nestedObject = self.float(forKey: object)
+                return nestedObject
+            }
             return 0
         }
-        return object.floatValue
+        else if let object = object as? NSNumber {
+            return object.floatValue
+        }
+        return 0
     }
     
     public func timeInterval(forKey key:String) -> TimeInterval {
@@ -203,6 +224,15 @@ public class Theme: Equatable {
     
     public func color(forKey key: String) -> Color {
         guard let cachedColor = self.colorCache.object(forKey: key as NSString) else {
+            if let colorPath = self.string(forKey: key) {
+                // checks if the key's value is a string
+                // if it is a string, then likely it is a path
+                let colorDictionary = self.dictionary(forKey: colorPath)
+                let color = self.color(fromDictionary: colorDictionary)
+                self.colorCache.setObject(color, forKey: key as NSString)
+                return color
+            }
+
             let colorDictionary = self.dictionary(forKey: key)
             let color = self.color(fromDictionary: colorDictionary)
             self.colorCache.setObject(color, forKey: key as NSString)
@@ -219,18 +249,11 @@ public class Theme: Equatable {
         
         var color: Color?
         let alphaObject = dictionary["alpha"]
-        if let hexString = dictionary["hex"] as? String {
-            // check the value is a path
-            if hexString.contains(".") {
-                let colorDictionary = self.dictionary(forKey: hexString)
-                color = self.color(fromDictionary: colorDictionary)
-            }
-            else {
-                color = colorWithHexString(hexString: hexString)
-                if let alphaObject = alphaObject {
-                    let alpha = self.float(fromObject: alphaObject)
-                    color = color?.withAlphaComponent(CGFloat(alpha))
-                }
+        if let hexString = self.string(fromObject: dictionary["hex"]) {
+            color = colorWithHexString(hexString: hexString)
+            if let alphaObject = alphaObject {
+                let alpha = self.float(fromObject: alphaObject)
+                color = color?.withAlphaComponent(CGFloat(alpha))
             }
         }
         else if let alphaObject = alphaObject {
@@ -238,6 +261,15 @@ public class Theme: Equatable {
             if alpha == 0 {
                 color = Color.clear
             }
+        }
+        
+        if let darkerObject = dictionary["darker"] {
+            let darker = self.float(fromObject: darkerObject)
+            color = color?.darker(amount: CGFloat(darker))
+        }
+        else if let lighterObject = dictionary["lighter"] {
+            let lighter = self.float(fromObject: lighterObject)
+            color = color?.lighter(amount: CGFloat(lighter))
         }
         
         if color == nil {
@@ -359,7 +391,7 @@ public class Theme: Equatable {
             viewSpecifier.highlightedBackgroundColor = self.color(fromDictionary: highlightedBackgroundColorDictionary)
         }
 		
-		if let disabledBackgroundColorDictionary = self.dictionary(fromObject: dictionary["disabledBackgroundColor"]) {
+        if let disabledBackgroundColorDictionary = self.dictionary(fromObject: dictionary["disabledBackgroundColor"]) {
 			viewSpecifier.disabledBackgroundColor = self.color(fromDictionary: disabledBackgroundColorDictionary)
 		}
         
@@ -476,6 +508,13 @@ public class Theme: Equatable {
         labelSpecifier.paragraphSpacingBeforeMultiple = self.float(fromObject: dictionary["paragraphSpacingBeforeMultiple"])
         
         labelSpecifier.lineSpacingMultiple = self.float(fromObject: dictionary["lineSpacingMultiple"])
+        
+        if let lineHeightMultiple = dictionary["lineHeightMultiple"] {
+            labelSpecifier.lineHeightMultiple = self.float(fromObject: lineHeightMultiple)
+        }
+        else {
+            labelSpecifier.lineHeightMultiple = 1
+        }
         
         let alignmentString = self.string(fromObject: dictionary["alignment"])
         labelSpecifier.alignment = self.textAlignment(fromObject: alignmentString)
