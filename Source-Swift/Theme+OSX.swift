@@ -101,6 +101,7 @@ public class TextLabelSpecifier {
     var textTransform: TextCaseTransform = .none
     
     var color: NSColor?
+	var darkColor: NSColor?
     var highlightedColor: NSColor?
     var disabledColor: NSColor?
     
@@ -255,7 +256,7 @@ public class TextLabelSpecifier {
         self.apply(toLabel: label, withText: nil)
     }
     
-    func apply(toLabel label: NSTextField, withText text: String?) {
+	func apply(toLabel label: NSTextField, withText text: String?, useDarkColor: Bool = false) {
         if let text = text {
             label.attributedStringValue = attributedString(withText: text)
         }
@@ -264,9 +265,13 @@ public class TextLabelSpecifier {
         }
         label.alignment = self.alignment
         label.maximumNumberOfLines = self.numberOfLines
-        if let color = self.color {
+		
+		if useDarkColor, let darkColor = self.darkColor {
+			label.textColor = darkColor
+		} else if let color = self.color {
             label.textColor = color
         }
+		
         if let backgroundColor = self.backgroundColor {
             label.backgroundColor = backgroundColor
         }
