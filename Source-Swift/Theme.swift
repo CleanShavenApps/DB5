@@ -294,6 +294,11 @@ public class Theme: Equatable {
         let fontName = self.string(fromObject: dictionary?["name"])
         var fontSize = CGFloat(self.float(fromObject: dictionary?["size"]))
         
+        var fontWeight: Font.Weight?
+        if let fontWeightName = self.string(fromObject: dictionary?["weight"]) {
+            fontWeight = Font.Weight.weight(with: fontWeightName)
+        }
+
         fontSize += CGFloat(sizeAdjustment)
         
         if fontSize < 1.0 {
@@ -303,7 +308,12 @@ public class Theme: Equatable {
         var font: Font?
         if let fontName = fontName {
             if stringIsEmpty(s: fontName) {
-                font = Font.systemFont(ofSize: fontSize)
+                if let fontWeight = fontWeight {
+                    font = Font.systemFont(ofSize: fontSize, weight: fontWeight)
+                }
+                else {
+                    font = Font.systemFont(ofSize: fontSize)
+                }
             }
             else {
                 font = Font(name: fontName, size: fontSize)
@@ -311,7 +321,12 @@ public class Theme: Equatable {
         }
 
         if font == nil {
-            font = Font.systemFont(ofSize: fontSize)
+            if let fontWeight = fontWeight {
+                font = Font.systemFont(ofSize: fontSize, weight: fontWeight)
+            }
+            else {
+                font = Font.systemFont(ofSize: fontSize)
+            }
         }
         return font!
     }
