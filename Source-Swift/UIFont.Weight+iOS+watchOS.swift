@@ -6,10 +6,11 @@
 //  Copyright © 2020 Lin Junjie. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 extension UIFont.Weight {
-    static func weight(with name: String) -> NSFont.Weight? {
+	
+    static func weight(with name: String) -> UIFont.Weight? {
         if name == "black" {
             return .black
         }
