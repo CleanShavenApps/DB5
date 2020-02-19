@@ -12,6 +12,34 @@ public class ThemeLoader {
     private(set) var defaultTheme: Theme!
     private(set) var themes: [Theme] = []
     
+    public init?(data: Data) {
+        guard let object = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? NSDictionary,
+            let themesDictionary = object else {
+            return nil
+        }
+        
+        var themes: [Theme] = []
+        for key in themesDictionary.allKeys {
+            if let themeDictionary = themesDictionary[key] as? [String: Any], let key = key as? String {
+                if let theme = Theme(name: key, themeDictionary: themeDictionary) {
+                    if key.lowercased() == "default" {
+                        self.defaultTheme = theme
+                    }
+                    themes.append(theme)
+                }
+            }
+        }
+        
+        /*All themes inherit from the default theme.*/
+        for oneTheme in themes {
+            if oneTheme != self.defaultTheme {
+                oneTheme.parentTheme = defaultTheme
+            }
+        }
+        
+        self.themes = themes
+    }
+    
     public init?() {
         guard let themesFilePath = Bundle.main.path(forResource: "DB5", ofType: "plist") else {
             return nil
