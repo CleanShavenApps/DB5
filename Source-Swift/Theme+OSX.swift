@@ -284,6 +284,19 @@ public class TextLabelSpecifier {
         textView.font = self.font
         textView.textColor = self.color
     }
+    
+    func apply(toLabelIn button: NSButton) {
+        if let font = self.font {
+            button.font = font
+        }
+        button.alignment = self.alignment
+
+        if let color = self.color {
+            let attributedTitle = NSMutableAttributedString(string: button.title)
+            attributedTitle.addAttribute(.foregroundColor, value: color, range: NSMakeRange(0, attributedTitle.length))
+            button.attributedTitle = attributedTitle
+        }
+    }
 }
 
 public class ViewSpecifier {
