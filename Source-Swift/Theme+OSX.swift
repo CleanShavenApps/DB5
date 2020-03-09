@@ -294,7 +294,15 @@ public class TextLabelSpecifier {
         if let color = self.color {
             let attributedTitle = NSMutableAttributedString(string: button.title)
             attributedTitle.addAttribute(.foregroundColor, value: color, range: NSMakeRange(0, attributedTitle.length))
+            if let font = self.font {
+                attributedTitle.addAttribute(.font, value: font, range: NSMakeRange(0, attributedTitle.length))
+            }
             button.attributedTitle = attributedTitle
+        }
+        
+        if let backgroundColor = self.backgroundColor {
+            button.wantsLayer = true
+            button.layer?.backgroundColor = backgroundColor.cgColor
         }
     }
 }
