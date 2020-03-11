@@ -470,7 +470,7 @@ public class Theme: Equatable {
                 return .byTruncatingMiddle
             }
         }
-        return .byTruncatingTail
+        return .byWordWrapping
     }
     
     public func textLabelSpecifier(forKey key: String) -> TextLabelSpecifier? {
