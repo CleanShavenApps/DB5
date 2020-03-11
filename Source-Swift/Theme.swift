@@ -538,6 +538,10 @@ public class Theme: Equatable {
             labelSpecifier.lineHeightMultiple = 1
         }
         
+        if let headIndent = dictionary["headIndent"] {
+            labelSpecifier.headIndent = self.float(fromObject: headIndent)
+        }
+        
         let alignmentString = self.string(fromObject: dictionary["alignment"])
         labelSpecifier.alignment = self.textAlignment(fromObject: alignmentString)
         

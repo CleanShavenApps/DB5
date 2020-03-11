@@ -96,6 +96,8 @@ public class TextLabelSpecifier {
     
     var lineHeightMultiple: Float = 1
     
+    var headIndent: Float = 0
+    
     var alignment: NSTextAlignment = .left
     var lineBreakMode: NSLineBreakMode = .byWordWrapping
     var textTransform: TextCaseTransform = .none
@@ -196,6 +198,11 @@ public class TextLabelSpecifier {
                     if self.lineSpacingMultiple>0, let font = self.font {
                         paragraphStyle.lineSpacing = font.pointSize * CGFloat(self.lineSpacingMultiple)
                     }
+                    
+                    if self.headIndent>0 {
+                        paragraphStyle.headIndent = CGFloat(headIndent)
+                    }
+                    
                     paragraphStyle.lineHeightMultiple = CGFloat(self.lineHeightMultiple)
                     
                     textAttributes[key] = paragraphStyle
