@@ -11,11 +11,13 @@ import UIKit
 public typealias Color = UIColor
 public typealias Font = UIFont
 public typealias EdgeInsets = UIEdgeInsets
+public typealias FontDescriptor = UIFontDescriptor
 #elseif os(OSX)
 import Cocoa
 public typealias Color = NSColor
 public typealias Font = NSFont
 public typealias EdgeInsets = NSEdgeInsets
+public typealias FontDescriptor = NSFontDescriptor
 #endif
 
 public enum TextCaseTransform {
@@ -292,6 +294,7 @@ public class Theme: Equatable {
     
     internal func font(fromDictionary dictionary: [String: Any]?, sizeAdjustment: Float) -> Font {
         let fontName = self.string(fromObject: dictionary?["name"])
+        let familyName = self.string(fromObject: dictionary?["family"])
         var fontSize = CGFloat(self.float(fromObject: dictionary?["size"]))
         
         var fontWeight: Font.Weight?
@@ -318,6 +321,10 @@ public class Theme: Equatable {
             else {
                 font = Font(name: fontName, size: fontSize)
             }
+        }
+        else if let familyName = familyName {
+            let fontDescriptor = FontDescriptor(fontAttributes: [.family: familyName])
+            font = Font(descriptor: fontDescriptor, size: fontSize)
         }
 
         if font == nil {
