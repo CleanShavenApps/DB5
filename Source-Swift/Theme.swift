@@ -229,6 +229,12 @@ public class Theme: Equatable {
             if let colorPath = self.string(forKey: key) {
                 // checks if the key's value is a string
                 // if it is a string, then likely it is a path
+                // check if it is a path to standard colors
+                if let color = self.standardColor(for: colorPath) {
+                    return color
+                }
+                
+                // else check if it is path to another defined color
                 let colorDictionary = self.dictionary(forKey: colorPath)
                 let color = self.color(fromDictionary: colorDictionary)
                 self.colorCache.setObject(color, forKey: key as NSString)
@@ -241,6 +247,22 @@ public class Theme: Equatable {
             return color
         }
         return cachedColor
+    }
+    
+    internal func color(fromDictionary dictionary: [String: Any], with key: String) -> Color? {
+        if let colorDictionary = self.dictionary(fromObject: dictionary[key]) {
+            return color(fromDictionary: colorDictionary)
+        }
+        // since colorDictionary cannot be returned from the key
+        // but it is still a string
+        // likely this isn't a colorPath that can be mapped to a dictionary
+        // but one that is a standard color
+        else if let colorPath = self.string(fromObject: dictionary[key]) {
+            return standardColor(for: colorPath)
+        }
+        else {
+            return nil
+        }
     }
     
     internal func color(fromDictionary dictionary: [String: Any]?) -> Color {
@@ -279,6 +301,16 @@ public class Theme: Equatable {
         }
         
         return color!
+    }
+    
+    func standardColor(for keyPath: String) -> Color? {
+        let components = keyPath.components(separatedBy: ".")
+        guard let firstComponent = components.first,
+            firstComponent == "standardColors" && components.count == 2 else {
+                return nil
+        }
+        let secondComponent = components[1]
+        return Color.perform(Selector(secondComponent))?.takeRetainedValue() as? Color
     }
     
     public func font(forKey key:String, sizeAdjustment: Float) -> Font {
@@ -551,8 +583,8 @@ public class Theme: Equatable {
         let textTransformString = self.string(fromObject: dictionary["textTransform"])
         labelSpecifier.textTransform = self.textCaseTransform(fromString: textTransformString)
         
-        if let colorDictionary = self.dictionary(fromObject: dictionary["color"]) {
-            labelSpecifier.color = self.color(fromDictionary: colorDictionary)
+        if let color = self.color(fromDictionary: dictionary, with: "color") {
+            labelSpecifier.color = color
         }
 		
 		if let darkColorDictionary = self.dictionary(fromObject: dictionary["darkColor"]) {
