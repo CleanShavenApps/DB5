@@ -217,18 +217,18 @@ public extension Theme {
                 return nil
             }
             
-            if let popoverBackgroundColorDictionary = self.dictionary(fromObject: dictionary["popoverBackgroundColor"]) {
-                navigationBarSpecifier.popoverBackgroundColor = self.color(fromDictionary: popoverBackgroundColorDictionary)
+            if let color = self.color(fromDictionary: dictionary, with: "popoverBackgroundColor") {
+                navigationBarSpecifier.popoverBackgroundColor = color
+            }
+ 
+            if let color = self.color(fromDictionary: dictionary, with: "barColor") {
+                navigationBarSpecifier.barColor = color
             }
             
-            if let barColorDictionary = self.dictionary(fromObject: dictionary["barColor"]) {
-                navigationBarSpecifier.barColor = self.color(fromDictionary: barColorDictionary)
+            if let color = self.color(fromDictionary: dictionary, with: "tintColor") {
+                navigationBarSpecifier.tintColor = color
             }
-            
-            if let tintColorDictionary = self.dictionary(fromObject: dictionary["tintColor"]) {
-                navigationBarSpecifier.tintColor = self.color(fromDictionary: tintColorDictionary)
-            }
-            
+
             navigationBarSpecifier.titleLabelSpecifier = self.textLabelSpecifier(fromDictionary: dictionary["titleLabel"] as? [String : Any], sizeAdjustment: sizeAdjustment)
             
             navigationBarSpecifier.buttonsLabelSpecifier = self.textLabelSpecifier(fromDictionary: dictionary["buttonsLabel"] as? [String : Any], sizeAdjustment: sizeAdjustment)
@@ -254,11 +254,8 @@ public extension Theme {
         
         let dashedBorderSpecifier = DashedBorderSpecifier()
         
-        if let colorPath = self.string(fromObject: dictionary["color"]), let colorDictionary = self.dictionary(forKey: colorPath) {
-            dashedBorderSpecifier.color = self.color(fromDictionary: colorDictionary)
-        }
-        else if let colorDictionary = self.dictionary(fromObject: dictionary["color"]) {
-            dashedBorderSpecifier.color = self.color(fromDictionary: colorDictionary)
+        if let color = self.color(fromDictionary: dictionary, with: "color") {
+            dashedBorderSpecifier.color = color
         }
         
         dashedBorderSpecifier.lineWidth = self.float(fromObject: dictionary["lineWidth"])

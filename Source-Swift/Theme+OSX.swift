@@ -55,14 +55,13 @@ public extension Theme {
         let sizeDictionary = self.dictionary(fromObject: dictionary["intercellSpacing"])
         viewSpecifier.intercellSpacing
             = self.size(fromDictionary: sizeDictionary)
-        
-        
-        if let backgroundColorDictionary = self.dictionary(fromObject: dictionary["backgroundColor"]) {
-            viewSpecifier.backgroundColor = self.color(fromDictionary: backgroundColorDictionary)
-        }
 
-        if let separatorColorDictionary = self.dictionary(fromObject: dictionary["separatorColor"]) {
-            viewSpecifier.separatorColor = self.color(fromDictionary: separatorColorDictionary)
+        if let color = self.color(fromDictionary: dictionary, with: "backgroundColor") {
+            viewSpecifier.backgroundColor = color
+        }
+        
+        if let color = self.color(fromDictionary: dictionary, with: "separatorColor") {
+            viewSpecifier.separatorColor = color
         }
 
         return viewSpecifier

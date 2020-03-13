@@ -436,18 +436,18 @@ public class Theme: Equatable {
         
         let positionDictionary = self.dictionary(fromObject: dictionary["position"])
         viewSpecifier.position = self.point(fromDictionary: positionDictionary)
-        
-        if let backgroundColorDictionary = self.dictionary(fromObject: dictionary["backgroundColor"]) {
-            viewSpecifier.backgroundColor = self.color(fromDictionary: backgroundColorDictionary)
+
+        if let color = self.color(fromDictionary: dictionary, with: "backgroundColor") {
+            viewSpecifier.backgroundColor = color
+        }
+
+        if let color = self.color(fromDictionary: dictionary, with: "highlightedBackgroundColor") {
+            viewSpecifier.highlightedBackgroundColor = color
         }
         
-        if let highlightedBackgroundColorDictionary = self.dictionary(fromObject: dictionary["highlightedBackgroundColor"]) {
-            viewSpecifier.highlightedBackgroundColor = self.color(fromDictionary: highlightedBackgroundColorDictionary)
+        if let color = self.color(fromDictionary: dictionary, with: "disabledBackgroundColor") {
+            viewSpecifier.disabledBackgroundColor = color
         }
-		
-        if let disabledBackgroundColorDictionary = self.dictionary(fromObject: dictionary["disabledBackgroundColor"]) {
-			viewSpecifier.disabledBackgroundColor = self.color(fromDictionary: disabledBackgroundColorDictionary)
-		}
         
         let edgeInsetsDictionary = self.dictionary(fromObject: dictionary["padding"])
         viewSpecifier.padding = self.edgeInsets(fromDictionary: edgeInsetsDictionary)
@@ -586,29 +586,29 @@ public class Theme: Equatable {
         if let color = self.color(fromDictionary: dictionary, with: "color") {
             labelSpecifier.color = color
         }
-		
-		if let darkColorDictionary = self.dictionary(fromObject: dictionary["darkColor"]) {
-			labelSpecifier.darkColor = self.color(fromDictionary: darkColorDictionary)
-		}
         
-        if let highlightedColorDictionary = self.dictionary(fromObject: dictionary["highlightedColor"]) {
-            labelSpecifier.highlightedColor = self.color(fromDictionary: highlightedColorDictionary)
+        if let color = self.color(fromDictionary: dictionary, with: "darkColor") {
+            labelSpecifier.darkColor = color
         }
         
-        if let disabledColorDictionary = self.dictionary(fromObject: dictionary["disabledColor"]) {
-            labelSpecifier.disabledColor = self.color(fromDictionary: disabledColorDictionary)
+        if let color = self.color(fromDictionary: dictionary, with: "highlightedColor") {
+            labelSpecifier.highlightedColor = color
         }
         
-        if let backgroundColorDictionary = self.dictionary(fromObject: dictionary["backgroundColor"]) {
-            labelSpecifier.backgroundColor = self.color(fromDictionary: backgroundColorDictionary)
+        if let color = self.color(fromDictionary: dictionary, with: "disabledColor") {
+            labelSpecifier.disabledColor = color
         }
         
-        if let highlightedBackgroundColorDictionary = self.dictionary(fromObject: dictionary["highlightedBackgroundColor"]) {
-            labelSpecifier.highlightedBackgroundColor = self.color(fromDictionary: highlightedBackgroundColorDictionary)
+        if let color = self.color(fromDictionary: dictionary, with: "backgroundColor") {
+            labelSpecifier.backgroundColor = color
         }
         
-        if let disabledBackgroundColorDictionary = self.dictionary(fromObject: dictionary["disabledBackgroundColor"]) {
-            labelSpecifier.disabledBackgroundColor = self.color(fromDictionary: disabledBackgroundColorDictionary)
+        if let color = self.color(fromDictionary: dictionary, with: "highlightedBackgroundColor") {
+            labelSpecifier.highlightedBackgroundColor = color
+        }
+        
+        if let color = self.color(fromDictionary: dictionary, with: "disabledBackgroundColor") {
+            labelSpecifier.disabledBackgroundColor = color
         }
         
         let edgeInsetsDictionary = self.dictionary(fromObject: dictionary["padding"])
