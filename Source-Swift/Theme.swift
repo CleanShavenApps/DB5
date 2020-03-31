@@ -12,12 +12,14 @@ public typealias Color = UIColor
 public typealias Font = UIFont
 public typealias EdgeInsets = UIEdgeInsets
 public typealias FontDescriptor = UIFontDescriptor
+public typealias Appearance = UIAppearance
 #elseif os(OSX)
 import Cocoa
 public typealias Color = NSColor
 public typealias Font = NSFont
 public typealias EdgeInsets = NSEdgeInsets
 public typealias FontDescriptor = NSFontDescriptor
+public typealias Appearance = NSAppearance
 #endif
 
 public enum TextCaseTransform {
@@ -452,6 +454,10 @@ public class Theme: Equatable {
         let edgeInsetsDictionary = self.dictionary(fromObject: dictionary["padding"])
         viewSpecifier.padding = self.edgeInsets(fromDictionary: edgeInsetsDictionary)
         
+        if let appearance = self.appearance(fromObject: dictionary["appearance"]) {
+            viewSpecifier.appearance = appearance
+        }
+
         return viewSpecifier
     }
 

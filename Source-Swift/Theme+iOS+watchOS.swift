@@ -21,6 +21,10 @@ public extension Theme {
         }
         return UIImage(named: imageName)
     }
+    
+    func appearance(forKey key: String) -> UIAppearance? {
+        return nil
+    }
 }
 
 public class ViewSpecifier {
@@ -46,6 +50,8 @@ public class ViewSpecifier {
             return nil
         }
     }
+    
+    public var appearance: UIAppearance?
 }
 
 public class DashedBorderSpecifier {

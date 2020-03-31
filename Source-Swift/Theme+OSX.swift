@@ -10,12 +10,17 @@ import Cocoa
 
 public extension Theme {
     
-    func appearance() -> NSAppearance.Name {
-        guard let appearanceName = self.string(forKey: "appearance") else {
-            return NSAppearance.Name.aqua
+    func appearance(forKey key:String) -> NSAppearance? {
+        let obj = self.object(forKey: key)
+        return self.appearance(fromObject: obj)
+    }
+    
+    func appearance(fromObject object: Any?) -> NSAppearance? {
+        guard let nameString = object as? String else {
+            return nil
         }
-        let appearance = NSAppearance.Name(appearanceName)
-        return appearance
+        let appearanceName = NSAppearance.Name(nameString)
+        return NSAppearance(named: appearanceName)
     }
     
     func scrollerKnobStyle(forKey key: String) -> NSScroller.KnobStyle {
@@ -323,6 +328,8 @@ public class ViewSpecifier {
     /** Not used when creating a view \c -viewWithViewSpecifierKey:. How padding
      affect the view to be interpreted by interested party. */
     public var padding = NSEdgeInsetsZero
+    
+    public var appearance: NSAppearance?
     
 }
 
