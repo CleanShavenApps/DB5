@@ -25,6 +25,10 @@ public extension Theme {
     func appearance(forKey key: String) -> UIAppearance? {
         return nil
     }
+	
+    func appearance(fromObject object: Any?) -> UIAppearance? {
+        return nil
+    }
 }
 
 public class ViewSpecifier {
