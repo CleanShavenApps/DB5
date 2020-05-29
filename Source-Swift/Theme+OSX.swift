@@ -297,13 +297,17 @@ public class TextLabelSpecifier {
     }
     
     func apply(toLabelIn button: NSButton) {
+        self.apply(toLabelIn: button, withText: button.title)
+    }
+    
+    func apply(toLabelIn button: NSButton, withText text: String) {
         if let font = self.font {
             button.font = font
         }
         button.alignment = self.alignment
 
         if let color = self.color {
-            let attributedTitle = NSMutableAttributedString(string: button.title)
+            let attributedTitle = NSMutableAttributedString(string: text)
             attributedTitle.addAttribute(.foregroundColor, value: color, range: NSMakeRange(0, attributedTitle.length))
             if let font = self.font {
                 attributedTitle.addAttribute(.font, value: font, range: NSMakeRange(0, attributedTitle.length))
