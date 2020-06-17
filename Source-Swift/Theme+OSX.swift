@@ -312,6 +312,11 @@ public class TextLabelSpecifier {
             if let font = self.font {
                 attributedTitle.addAttribute(.font, value: font, range: NSMakeRange(0, attributedTitle.length))
             }
+            
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.alignment = self.alignment
+            attributedTitle.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSMakeRange(0, attributedTitle.length))
+            
             button.attributedTitle = attributedTitle
         }
         
