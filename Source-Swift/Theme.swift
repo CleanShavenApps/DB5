@@ -536,7 +536,15 @@ public class Theme: Equatable {
         
         let labelSpecifier = TextLabelSpecifier()
         
-        let fontDictionary = self.dictionary(fromObject: dictionary["font"])
+        var fontDictionary = self.dictionary(fromObject: dictionary["font"])
+        // support for different fonts with different localization
+        if let lang = Locale.preferredLanguages.first {
+            let alternateFontKey = "font*\(lang)"
+            if let alternateFontDictionary = self.dictionary(fromObject: dictionary[alternateFontKey]) {
+                fontDictionary = alternateFontDictionary
+            }
+        }
+        
         labelSpecifier.font = self.font(fromDictionary: fontDictionary, sizeAdjustment: sizeAdjustment)
 		
 		if let boldFontDictionary = self.dictionary(fromObject: dictionary["boldFont"]) {
