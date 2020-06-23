@@ -61,9 +61,13 @@ public func colorWithHexString(hexString: String?) -> Color {
 }
 
 public class Theme: Equatable {
-    
+
     public var name: String
     public var parentTheme: Theme?
+    public var optionalKeyPath: String?
+    public enum Keys: String {
+        case font
+    }
     
     internal var themeDictionary: [String: Any]
     
@@ -119,10 +123,21 @@ public class Theme: Equatable {
     }
     
     public func dictionary(fromObject object:Any?) -> [String: Any]? {
-        if let key = object as? String, let dictionary = self.dictionary(forKey: key) {
-            return dictionary
+
+        var dictionary: [String: Any]? = object as? [String: Any]
+        if let key = object as? String,
+            let dictionaryObject = self.dictionary(forKey: key) {
+            dictionary = dictionaryObject
         }
-        return object as? [String: Any]
+        
+        // check if dictionary should be replaced
+        // by a subdictionary inside
+        if let keyPath = optionalKeyPath,
+            let subdictionary = (dictionary as NSDictionary?)?.value(forKeyPath: keyPath) {
+            dictionary = subdictionary as? [String : Any]
+        }
+        
+        return dictionary
     }
     
     // MARK: Basic Data Types
@@ -327,6 +342,7 @@ public class Theme: Equatable {
     }
     
     internal func font(fromDictionary dictionary: [String: Any]?, sizeAdjustment: Float) -> Font {
+
         let fontName = self.string(fromObject: dictionary?["name"])
         let familyName = self.string(fromObject: dictionary?["family"])
         var fontSize = CGFloat(self.float(fromObject: dictionary?["size"]))
@@ -536,14 +552,7 @@ public class Theme: Equatable {
         
         let labelSpecifier = TextLabelSpecifier()
         
-        var fontDictionary = self.dictionary(fromObject: dictionary["font"])
-        // support for different fonts with different localization
-        if let lang = Locale.preferredLanguages.first {
-            let alternateFontKey = "font*\(lang)"
-            if let alternateFontDictionary = self.dictionary(fromObject: dictionary[alternateFontKey]) {
-                fontDictionary = alternateFontDictionary
-            }
-        }
+        let fontDictionary = self.dictionary(fromObject: dictionary["font"])
         
         labelSpecifier.font = self.font(fromDictionary: fontDictionary, sizeAdjustment: sizeAdjustment)
 		
