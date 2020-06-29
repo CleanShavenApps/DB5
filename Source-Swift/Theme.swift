@@ -111,6 +111,13 @@ public class Theme: Equatable {
         if obj == nil, let parentTheme = self.parentTheme {
             obj = parentTheme.object(forKey: key)
         }
+
+        // check if values in the dictionary
+        // should be replaced by values in the subdictionary inside
+        if let dictionary = obj as? [String: Any] {
+            obj = replaceValuesWithValuesInOptionalKeyPath(in: dictionary)
+        }
+        
         return obj
     }
     
@@ -129,15 +136,31 @@ public class Theme: Equatable {
             let dictionaryObject = self.dictionary(forKey: key) {
             dictionary = dictionaryObject
         }
-        
-        // check if dictionary should be replaced
-        // by a subdictionary inside
-        if let keyPath = optionalKeyPath,
-            let subdictionary = (dictionary as NSDictionary?)?.value(forKeyPath: keyPath) {
-            dictionary = subdictionary as? [String : Any]
-        }
-        
+
+        // check if values in the dictionary
+        // should be replaced by values in the subdictionary inside
+        dictionary = replaceValuesWithValuesInOptionalKeyPath(in: dictionary)
+
         return dictionary
+    }
+    
+    // check if optional key path exists
+    // and use values of keys that exists in the optional key path to
+    // replace default values
+    private func replaceValuesWithValuesInOptionalKeyPath(in dictionary: [String: Any]?) -> [String: Any]? {
+        var newDictionary = dictionary
+        
+        // check if values in the dictionary
+        // should be replaced by values in the subdictionary inside
+        if let keyPath = optionalKeyPath,
+            let subdictionary = (newDictionary as NSDictionary?)?.value(forKeyPath: keyPath) as? [String : Any] {
+            for (key, value) in subdictionary {
+                if let _ = newDictionary?[key] {
+                    newDictionary?[key] = value
+                }
+            }
+        }
+        return newDictionary
     }
     
     // MARK: Basic Data Types
