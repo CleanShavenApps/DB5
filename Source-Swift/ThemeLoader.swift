@@ -13,10 +13,9 @@ public class ThemeLoader {
     private(set) var themes: [Theme] = []
     
     public init?(data: Data) {
-        guard let object = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? NSDictionary,
-            let themesDictionary = object else {
-            return nil
-        }
+		guard let themesDictionary = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? NSDictionary else {
+			return nil
+		}
         
         var themes: [Theme] = []
         for key in themesDictionary.allKeys {
