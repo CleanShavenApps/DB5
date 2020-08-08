@@ -8,18 +8,18 @@
 
 #if os(iOS)
 import UIKit
-public typealias Color = UIColor
-public typealias Font = UIFont
-public typealias EdgeInsets = UIEdgeInsets
-public typealias FontDescriptor = UIFontDescriptor
-public typealias Appearance = UIAppearance
+public typealias DB5Color = UIColor
+public typealias DB5Font = UIFont
+public typealias DB5EdgeInsets = UIEdgeInsets
+public typealias DB5FontDescriptor = UIFontDescriptor
+public typealias DB5Appearance = UIAppearance
 #elseif os(OSX)
 import Cocoa
-public typealias Color = NSColor
-public typealias Font = NSFont
-public typealias EdgeInsets = NSEdgeInsets
-public typealias FontDescriptor = NSFontDescriptor
-public typealias Appearance = NSAppearance
+public typealias DB5Color = NSColor
+public typealias DB5Font = NSFont
+public typealias DB5EdgeInsets = NSEdgeInsets
+public typealias DB5FontDescriptor = NSFontDescriptor
+public typealias DB5Appearance = NSAppearance
 #endif
 
 public enum TextCaseTransform {
@@ -36,13 +36,13 @@ public func stringIsEmpty(s: String?) -> Bool {
 }
 
 // Picky. Crashes by design.
-public func colorWithHexString(hexString: String?) -> Color {
+public func colorWithHexString(hexString: String?) -> DB5Color {
     
     guard let hexString = hexString else {
-        return Color.black
+        return DB5Color.black
     }
     if stringIsEmpty(s: hexString) {
-        return Color.black
+        return DB5Color.black
     }
 
     let s: NSMutableString = NSMutableString(string: hexString)
@@ -57,7 +57,7 @@ public func colorWithHexString(hexString: String?) -> Color {
     Scanner(string: greenString).scanHexInt32(&g)
     Scanner(string: blueString).scanHexInt32(&b)
     
-    return Color(red: CGFloat(r)/255.0, green: CGFloat(g)/255.0, blue: CGFloat(b)/255.0, alpha: 1.0)
+    return DB5Color(red: CGFloat(r)/255.0, green: CGFloat(g)/255.0, blue: CGFloat(b)/255.0, alpha: 1.0)
 }
 
 public class Theme: Equatable {
@@ -82,11 +82,11 @@ public class Theme: Equatable {
     
     // MARK: Lazy Accessors for Cache
     
-    internal lazy var colorCache: NSCache<NSString, Color> = {
+    internal lazy var colorCache: NSCache<NSString, DB5Color> = {
         return NSCache()
     }()
     
-    internal lazy var fontCache: NSCache<NSString, Font> = {
+    internal lazy var fontCache: NSCache<NSString, DB5Font> = {
         return NSCache()
     }()
     
@@ -248,23 +248,23 @@ public class Theme: Equatable {
     
     // MARK: Advanced Data Types
     
-    public func edgeInsets(forKey key: String) -> EdgeInsets {
+    public func edgeInsets(forKey key: String) -> DB5EdgeInsets {
         let insetsDictionary = self.dictionary(forKey: key)
         let edgeInsets = self.edgeInsets(fromDictionary: insetsDictionary)
         return edgeInsets
     }
     
-    internal func edgeInsets(fromDictionary dictionary: [String: Any]?) -> EdgeInsets {
+    internal func edgeInsets(fromDictionary dictionary: [String: Any]?) -> DB5EdgeInsets {
         let left = CGFloat(self.float(fromObject: dictionary?["left"]))
         let top = CGFloat(self.float(fromObject: dictionary?["top"]))
         let right = CGFloat(self.float(fromObject: dictionary?["right"]))
         let bottom = CGFloat(self.float(fromObject: dictionary?["bottom"]))
         
-        let edgeInsets = EdgeInsets(top: top, left: left, bottom: bottom, right: right)
+        let edgeInsets = DB5EdgeInsets(top: top, left: left, bottom: bottom, right: right)
         return edgeInsets
     }
     
-    public func color(forKey key: String) -> Color {
+    public func color(forKey key: String) -> DB5Color {
         guard let cachedColor = self.colorCache.object(forKey: key as NSString) else {
             if let colorPath = self.string(forKey: key) {
                 // checks if the key's value is a string
@@ -289,7 +289,7 @@ public class Theme: Equatable {
         return cachedColor
     }
     
-    internal func color(fromDictionary dictionary: [String: Any], with key: String) -> Color? {
+    internal func color(fromDictionary dictionary: [String: Any], with key: String) -> DB5Color? {
         if let colorDictionary = self.dictionary(fromObject: dictionary[key]) {
             return color(fromDictionary: colorDictionary)
         }
@@ -305,13 +305,13 @@ public class Theme: Equatable {
         }
     }
     
-    internal func color(fromDictionary dictionary: [String: Any]?) -> Color {
+    internal func color(fromDictionary dictionary: [String: Any]?) -> DB5Color {
 
         guard let dictionary = dictionary else {
-            return Color.black
+            return DB5Color.black
         }
         
-        var color: Color?
+        var color: DB5Color?
         let alphaObject = dictionary["alpha"]
         if let hexString = self.string(fromObject: dictionary["hex"]) {
             color = colorWithHexString(hexString: hexString)
@@ -323,7 +323,7 @@ public class Theme: Equatable {
         else if let alphaObject = alphaObject {
             let alpha = self.float(fromObject: alphaObject)
             if alpha == 0 {
-                color = Color.clear
+                color = DB5Color.clear
             }
         }
         
@@ -337,23 +337,23 @@ public class Theme: Equatable {
         }
         
         if color == nil {
-            color = Color.black
+            color = DB5Color.black
         }
         
         return color!
     }
     
-    func standardColor(for keyPath: String) -> Color? {
+    func standardColor(for keyPath: String) -> DB5Color? {
         let components = keyPath.components(separatedBy: ".")
         guard let firstComponent = components.first,
             firstComponent == "standardColors" && components.count == 2 else {
                 return nil
         }
         let secondComponent = components[1]
-        return Color.perform(Selector(secondComponent))?.takeRetainedValue() as? Color
+        return DB5Color.perform(Selector(secondComponent))?.takeRetainedValue() as? DB5Color
     }
     
-    public func font(forKey key:String, sizeAdjustment: Float) -> Font {
+    public func font(forKey key:String, sizeAdjustment: Float) -> DB5Font {
         let cacheKey = key.appendingFormat("_%.2f", sizeAdjustment)
         guard let cachedFont = self.fontCache.object(forKey: cacheKey as NSString) else {
             let fontDictionary = self.dictionary(forKey: key)
@@ -364,15 +364,15 @@ public class Theme: Equatable {
         return cachedFont
     }
     
-    internal func font(fromDictionary dictionary: [String: Any]?, sizeAdjustment: Float) -> Font {
+    internal func font(fromDictionary dictionary: [String: Any]?, sizeAdjustment: Float) -> DB5Font {
 
         let fontName = self.string(fromObject: dictionary?["name"])
         let familyName = self.string(fromObject: dictionary?["family"])
         var fontSize = CGFloat(self.float(fromObject: dictionary?["size"]))
         
-        var fontWeight: Font.Weight?
+        var fontWeight: DB5Font.Weight?
         if let fontWeightName = self.string(fromObject: dictionary?["weight"]) {
-            fontWeight = Font.Weight.weight(with: fontWeightName)
+            fontWeight = DB5Font.Weight.weight(with: fontWeightName)
         }
 
         fontSize += CGFloat(sizeAdjustment)
@@ -381,31 +381,31 @@ public class Theme: Equatable {
             fontSize = 15.0
         }
         
-        var font: Font?
+        var font: DB5Font?
         if let fontName = fontName {
             if stringIsEmpty(s: fontName) {
                 if let fontWeight = fontWeight {
-                    font = Font.systemFont(ofSize: fontSize, weight: fontWeight)
+                    font = DB5Font.systemFont(ofSize: fontSize, weight: fontWeight)
                 }
                 else {
-                    font = Font.systemFont(ofSize: fontSize)
+                    font = DB5Font.systemFont(ofSize: fontSize)
                 }
             }
             else {
-                font = Font(name: fontName, size: fontSize)
+                font = DB5Font(name: fontName, size: fontSize)
             }
         }
         else if let familyName = familyName {
-            let fontDescriptor = FontDescriptor(fontAttributes: [.family: familyName])
-            font = Font(descriptor: fontDescriptor, size: fontSize)
+            let fontDescriptor = DB5FontDescriptor(fontAttributes: [.family: familyName])
+            font = DB5Font(descriptor: fontDescriptor, size: fontSize)
         }
 
         if font == nil {
             if let fontWeight = fontWeight {
-                font = Font.systemFont(ofSize: fontSize, weight: fontWeight)
+                font = DB5Font.systemFont(ofSize: fontSize, weight: fontWeight)
             }
             else {
-                font = Font.systemFont(ofSize: fontSize)
+                font = DB5Font.systemFont(ofSize: fontSize)
             }
         }
         return font!
