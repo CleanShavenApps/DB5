@@ -315,6 +315,7 @@ public class TextLabelSpecifier {
             
             let paragraphStyle = NSMutableParagraphStyle()
             paragraphStyle.alignment = self.alignment
+            paragraphStyle.lineBreakMode = self.lineBreakMode
             attributedTitle.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSMakeRange(0, attributedTitle.length))
             
             button.attributedTitle = attributedTitle
