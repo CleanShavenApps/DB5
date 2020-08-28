@@ -28,6 +28,30 @@ public enum TextCaseTransform {
     case lower
 }
 
+public enum FontAdjustment: Equatable {
+    case absolute(CGFloat)
+    case proportional(CGFloat)
+    
+    public static func ==(lhs: FontAdjustment, rhs: FontAdjustment) -> Bool {
+        switch (lhs, rhs) {
+        case let (.absolute(a),   .absolute(b)),
+             let (.proportional(a), .proportional(b)):
+          return a == b
+        default:
+          return false
+        }
+    }
+    
+    internal var cacheKey: String {
+        switch self {
+        case .absolute(let size):
+            return "_abs_\(size)"
+        case .proportional(let size):
+            return "_prop_\(size)"
+        }
+    }
+}
+
 public func stringIsEmpty(s: String?) -> Bool {
     guard let s = s else {
         return true
@@ -353,8 +377,8 @@ public class Theme: Equatable {
         return Color.perform(Selector(secondComponent))?.takeRetainedValue() as? Color
     }
     
-    public func font(forKey key:String, sizeAdjustment: Float) -> Font {
-        let cacheKey = key.appendingFormat("_%.2f", sizeAdjustment)
+    public func font(forKey key:String, sizeAdjustment: FontAdjustment) -> Font {
+        let cacheKey = key.appendingFormat("_%@", sizeAdjustment.cacheKey)
         guard let cachedFont = self.fontCache.object(forKey: cacheKey as NSString) else {
             let fontDictionary = self.dictionary(forKey: key)
             let font = self.font(fromDictionary: fontDictionary, sizeAdjustment: sizeAdjustment)
@@ -364,7 +388,7 @@ public class Theme: Equatable {
         return cachedFont
     }
     
-    internal func font(fromDictionary dictionary: [String: Any]?, sizeAdjustment: Float) -> Font {
+    internal func font(fromDictionary dictionary: [String: Any]?, sizeAdjustment: FontAdjustment) -> Font {
 
         let fontName = self.string(fromObject: dictionary?["name"])
         let familyName = self.string(fromObject: dictionary?["family"])
@@ -375,7 +399,13 @@ public class Theme: Equatable {
             fontWeight = Font.Weight.weight(with: fontWeightName)
         }
 
-        fontSize += CGFloat(sizeAdjustment)
+        switch sizeAdjustment {
+        case .absolute(let adjustment):
+            fontSize += CGFloat(adjustment)
+        case .proportional(let adjustment):
+            fontSize += fontSize * CGFloat(adjustment)
+        }
+        
         
         if fontSize < 1.0 {
             fontSize = 15.0
@@ -551,11 +581,11 @@ public class Theme: Equatable {
     }
     
     public func textLabelSpecifier(forKey key: String) -> TextLabelSpecifier? {
-        return self.textLabelSpecifier(forKey: key, sizeAdjustment: 0)
+        return self.textLabelSpecifier(forKey: key, sizeAdjustment: .absolute(0))
     }
     
-    public func textLabelSpecifier(forKey key: String, sizeAdjustment: Float) -> TextLabelSpecifier? {
-        let cacheKey = key.appendingFormat("_%.2f", sizeAdjustment)
+    public func textLabelSpecifier(forKey key: String, sizeAdjustment: FontAdjustment) -> TextLabelSpecifier? {
+        let cacheKey = key.appendingFormat("_%@", sizeAdjustment.cacheKey)
         guard let cachedSpecifier = self.textLabelSpecifierCache.object(forKey: cacheKey as NSString) else {
             let dictionary = self.dictionary(forKey: key)
             let labelSpecifier = self.textLabelSpecifier(fromDictionary: dictionary, sizeAdjustment: sizeAdjustment)
@@ -567,7 +597,7 @@ public class Theme: Equatable {
         return cachedSpecifier
     }
     
-    public func textLabelSpecifier(fromDictionary dictionary: [String: Any]?, sizeAdjustment: Float) -> TextLabelSpecifier? {
+    public func textLabelSpecifier(fromDictionary dictionary: [String: Any]?, sizeAdjustment: FontAdjustment) -> TextLabelSpecifier? {
         
         guard let dictionary = dictionary else {
             return nil
