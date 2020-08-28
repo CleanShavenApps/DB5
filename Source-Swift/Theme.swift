@@ -409,7 +409,7 @@ public class Theme: Equatable {
 			case .absolute(let adjustment):
 				fontSize += CGFloat(adjustment)
 			case .proportional(let adjustment):
-				fontSize += fontSize * CGFloat(adjustment)
+				fontSize = fontSize * CGFloat(adjustment)
 			}
 		}
         
