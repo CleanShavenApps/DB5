@@ -13,7 +13,7 @@ public class ThemeLoader {
     private(set) var themes: [Theme] = []
     
     public init?(data: Data) {
-		guard let themesDictionary = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil) as? NSDictionary else {
+		guard let themesPlist = try? PropertyListSerialization.propertyList(from: data, options: [], format: nil), let themesDictionary = themesPlist as? NSDictionary else {
 			return nil
 		}
         
