@@ -396,6 +396,7 @@ public class Theme: Equatable {
     internal func font(fromDictionary dictionary: [String: Any]?, sizeAdjustment: FontAdjustment?) -> DB5Font {
         let fontName = self.string(fromObject: dictionary?["name"])
         let familyName = self.string(fromObject: dictionary?["family"])
+        let design = self.string(fromObject: dictionary?["design"])
         var fontSize = CGFloat(self.float(fromObject: dictionary?["size"]))
         
         var fontWeight: DB5Font.Weight?
@@ -441,6 +442,14 @@ public class Theme: Equatable {
             }
             else {
                 font = DB5Font.systemFont(ofSize: fontSize)
+            }
+        }
+        
+        if #available(macOS 10.15, *) {
+            if let design = design,
+               let fontDescriptor = font!.fontDescriptor.withDesign(NSFontDescriptor.SystemDesign.design(with: design)) {
+                
+                font = NSFont(descriptor: fontDescriptor, size: fontSize)
             }
         }
         return font!
