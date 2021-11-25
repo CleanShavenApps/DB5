@@ -445,7 +445,7 @@ public class Theme: Equatable {
             }
         }
         
-        if #available(macOS 10.15, *) {
+        if #available(macOS 10.15, iOS 12.2, watchOS 5.2, *) {
             if let design = design,
                let fontDescriptor = font!.fontDescriptor.withDesign(NSFontDescriptor.SystemDesign.design(with: design)) {
                 
