@@ -394,16 +394,27 @@ public class Theme: Equatable {
     }
     
     internal func font(fromDictionary dictionary: [String: Any]?, sizeAdjustment: FontAdjustment?) -> DB5Font {
-        let fontName = self.string(fromObject: dictionary?["name"])
+        var fontName = self.string(fromObject: dictionary?["name"])
+        // fontName that is an empty string will be forced to use system
+        // this is used when certain languages need a system font
+        // when the default font isn't system
+        if fontName == "" {
+            fontName = nil
+        }
+        
         let familyName = self.string(fromObject: dictionary?["family"])
         let design = self.string(fromObject: dictionary?["design"])
         var fontSize = CGFloat(self.float(fromObject: dictionary?["size"]))
         
         var fontWeight: DB5Font.Weight?
-        if let fontWeightName = self.string(fromObject: dictionary?["weight"]) {
+        // font weight that is an empty string will be forced to have no font weight setting
+        // hence will be forced to default
+        // this is used when certain languages require font weight
+        // but the default setting doesn't need a font weight, and overwritting languages
+        // only works when the key exists in default
+        if let fontWeightName = self.string(fromObject: dictionary?["weight"]), fontWeightName != "" {
             fontWeight = DB5Font.Weight.weight(with: fontWeightName)
         }
-
 		if let sizeAdjustment = sizeAdjustment {
 			switch sizeAdjustment {
 			case .absolute(let adjustment):
