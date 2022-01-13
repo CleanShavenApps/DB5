@@ -68,6 +68,9 @@ public extension Theme {
         if let color = self.color(fromDictionary: dictionary, with: "separatorColor") {
             viewSpecifier.separatorColor = color
         }
+        
+        let edgeInsetsDictionary = self.dictionary(fromObject: dictionary["padding"])
+        viewSpecifier.padding = self.edgeInsets(fromDictionary: edgeInsetsDictionary)
 
         return viewSpecifier
     }
