@@ -10,7 +10,7 @@ import UIKit
 
 extension UIFontDescriptor.SystemDesign {
     
-    @available(iOS 12.2, watchOS 5.2, *)
+    @available(iOS 13.0, watchOS 5.2, *)
     static func design(with name: String) -> UIFontDescriptor.SystemDesign {
         if name == "rounded" {
             return .rounded

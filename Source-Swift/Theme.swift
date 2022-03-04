@@ -456,11 +456,11 @@ public class Theme: Equatable {
             }
         }
         
-        if #available(macOS 10.15, iOS 12.2, watchOS 5.2, *) {
+        if #available(macOS 10.15, iOS 13.0, watchOS 5.2, *) {
             if let design = design,
-               let fontDescriptor = font!.fontDescriptor.withDesign(NSFontDescriptor.SystemDesign.design(with: design)) {
+               let fontDescriptor = font!.fontDescriptor.withDesign(DB5FontDescriptor.SystemDesign.design(with: design)) {
                 
-                font = NSFont(descriptor: fontDescriptor, size: fontSize)
+                font = DB5Font(descriptor: fontDescriptor, size: fontSize)
             }
         }
         return font!
