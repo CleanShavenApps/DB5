@@ -142,7 +142,7 @@ public extension Theme {
         }
     }
     
-    /** Where the possible values are whitelarge, white, gray. Defaults to gray */
+    /** Where the possible values are whitelarge, white, gray. Defaults to gray (medium) */
     func activityIndicatorViewStyle(forKey key: String) -> UIActivityIndicatorView.Style {
         let obj = self.object(forKey: key)
         return activityIndicatorViewStyle(fromObject: obj)
@@ -150,18 +150,18 @@ public extension Theme {
     
     private func activityIndicatorViewStyle(fromObject object: Any?) -> UIActivityIndicatorView.Style {
         guard let barStyleString = string(fromObject: object)?.lowercased(), stringIsEmpty(s: barStyleString) == false else {
-            return .gray
+            return .medium
         }
         
         switch barStyleString {
         case "whitelarge":
-            return .whiteLarge
+            return .large
         case "white":
-            return .white
+            return .medium
         case "gray":
-            return .gray
+            return .medium
         default:
-            return .gray
+            return .medium
         }
     }
     
