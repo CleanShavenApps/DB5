@@ -353,6 +353,15 @@ public class TableViewSpecifier: ViewSpecifier {
     func apply(toTableView tableView: NSTableView) {
         if let backgroundColor = backgroundColor {
             tableView.backgroundColor = backgroundColor
+            
+            // Fix for macOS 26.0 white bars issue in section headers
+            if #available(macOS 26.0, *) {
+                if let scrollView = tableView.enclosingScrollView {
+                    let clipView = scrollView.contentView
+                    clipView.backgroundColor = backgroundColor
+                    clipView.drawsBackground = true
+                }
+            }
         }
         if let separatorColor = separatorColor {
             tableView.gridColor = separatorColor
@@ -360,7 +369,6 @@ public class TableViewSpecifier: ViewSpecifier {
         if let intercellSpacing = intercellSpacing {
             tableView.intercellSpacing = intercellSpacing
         }
-        
     }
 }
 
