@@ -76,10 +76,10 @@ public func colorWithHexString(hexString: String?) -> DB5Color {
     let greenString = s.substring(with: NSMakeRange(2, 2))
     let blueString = s.substring(with: NSMakeRange(4, 2))
     
-    var r: UInt32 = 0, g: UInt32 = 0, b: UInt32 = 0
-    Scanner(string: redString).scanHexInt32(&r)
-    Scanner(string: greenString).scanHexInt32(&g)
-    Scanner(string: blueString).scanHexInt32(&b)
+    var r: UInt64 = 0, g: UInt64 = 0, b: UInt64 = 0
+    Scanner(string: redString).scanHexInt64(&r)
+    Scanner(string: greenString).scanHexInt64(&g)
+    Scanner(string: blueString).scanHexInt64(&b)
     
     return DB5Color(red: CGFloat(r)/255.0, green: CGFloat(g)/255.0, blue: CGFloat(b)/255.0, alpha: 1.0)
 }
