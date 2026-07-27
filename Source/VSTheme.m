@@ -325,7 +325,7 @@ static UIColor *colorWithHexString(NSString *hexString);
 		return cachedFont;
     
 	NSDictionary *fontDictionary = [self dictionaryForKey:key];
-	UIFont *font = [self vs_fontFromDictionary:fontDictionary sizeAdjustment:sizeAdjustment];
+	UIFont *font = [self vs_fontFromDictionary:fontDictionary keyPath:key sizeAdjustment:sizeAdjustment];
     
 	[self.fontCache setObject:font forKey:cacheKey];
 	
@@ -333,11 +333,17 @@ static UIColor *colorWithHexString(NSString *hexString);
 }
 
 
-- (UIFont *)vs_fontFromDictionary:(NSDictionary *)fontDictionary sizeAdjustment:(CGFloat)sizeAdjustment {
-	
+- (UIFont *)vs_fontFromDictionary:(NSDictionary *)fontDictionary keyPath:(NSString *)keyPath sizeAdjustment:(CGFloat)sizeAdjustment {
+
 	NSString *fontName = [self vs_stringFromObject:fontDictionary[@"name"]];
 	CGFloat fontSize = [self vs_floatFromObject:fontDictionary[@"size"]];
-	
+
+	if (self.fontResolver != nil) {
+		UIFont *resolvedFont = self.fontResolver(keyPath, fontName, fontSize);
+		if (resolvedFont != nil)
+			return resolvedFont;
+	}
+
 	fontSize += sizeAdjustment;
 	
 	if (fontSize < 1.0f)
@@ -502,11 +508,15 @@ static UIColor *colorWithHexString(NSString *hexString);
 
 
 - (VSNavigationBarSpecifier *)navigationBarSpecifierForKey:(NSString *)key sizeAdjustment:(CGFloat)sizeAdjustment {
-	
-	VSNavigationBarSpecifier *cachedSpecifier = [self.navigationBarSpecifierCache objectForKey:key];
+
+	// The adjustment belongs in the cache key, as it already does for the font and
+	// text-label caches: keyed on `key` alone, the first adjustment asked for won
+	// until the cache was cleared.
+	NSString *cacheKey = [key stringByAppendingFormat:@"_%.2f", sizeAdjustment];
+	VSNavigationBarSpecifier *cachedSpecifier = [self.navigationBarSpecifierCache objectForKey:cacheKey];
 	if (cachedSpecifier != nil)
 		return cachedSpecifier;
-	
+
 	VSNavigationBarSpecifier *navigationBarSpecifier = [VSNavigationBarSpecifier new];
 	NSDictionary *dictionary = [self dictionaryForKey:key];
 	
@@ -525,9 +535,9 @@ static UIColor *colorWithHexString(NSString *hexString);
 	if (tintColorDictionary)
 		navigationBarSpecifier.tintColor = [self vs_colorFromDictionary:tintColorDictionary];
 	
-	navigationBarSpecifier.titleLabelSpecifier = [self vs_textLabelSpecifierFromDictionary:dictionary[@"titleLabel"] sizeAdjustment:sizeAdjustment];
-	
-	navigationBarSpecifier.buttonsLabelSpecifier = [self vs_textLabelSpecifierFromDictionary:dictionary[@"buttonsLabel"] sizeAdjustment:sizeAdjustment];
+	navigationBarSpecifier.titleLabelSpecifier = [self vs_textLabelSpecifierFromDictionary:dictionary[@"titleLabel"] keyPath:[key stringByAppendingString:@".titleLabel"] sizeAdjustment:sizeAdjustment];
+
+	navigationBarSpecifier.buttonsLabelSpecifier = [self vs_textLabelSpecifierFromDictionary:dictionary[@"buttonsLabel"] keyPath:[key stringByAppendingString:@".buttonsLabel"] sizeAdjustment:sizeAdjustment];
 	
 	// isTranslucent by default
 	id translucentObject = dictionary[@"translucency"];
@@ -537,8 +547,8 @@ static UIColor *colorWithHexString(NSString *hexString);
 	UIBarStyle barStyle = [self vs_barStyleFromObject:dictionary[@"barStyle"]];
 	navigationBarSpecifier.barStyle = barStyle;
 	
-	[self.navigationBarSpecifierCache setObject:navigationBarSpecifier forKey:key];
-	
+	[self.navigationBarSpecifierCache setObject:navigationBarSpecifier forKey:cacheKey];
+
 	return navigationBarSpecifier;
 }
 
@@ -557,8 +567,8 @@ static UIColor *colorWithHexString(NSString *hexString);
 		return cachedSpecifier;
 	
 	NSDictionary *dictionary = [self dictionaryForKey:key];
-	
-	VSTextLabelSpecifier *labelSpecifier = [self vs_textLabelSpecifierFromDictionary:dictionary sizeAdjustment:sizeAdjustment];
+
+	VSTextLabelSpecifier *labelSpecifier = [self vs_textLabelSpecifierFromDictionary:dictionary keyPath:key sizeAdjustment:sizeAdjustment];
 	
 	if (labelSpecifier)
 		[self.textLabelSpecifierCache setObject:labelSpecifier forKey:cacheKey];
@@ -567,24 +577,24 @@ static UIColor *colorWithHexString(NSString *hexString);
 }
 
 
-- (VSTextLabelSpecifier *)vs_textLabelSpecifierFromDictionary:(NSDictionary *)dictionary sizeAdjustment:(CGFloat)sizeAdjustment {
-	
+- (VSTextLabelSpecifier *)vs_textLabelSpecifierFromDictionary:(NSDictionary *)dictionary keyPath:(NSString *)keyPath sizeAdjustment:(CGFloat)sizeAdjustment {
+
 	if (!dictionary)
 		return nil;
-	
+
 	VSTextLabelSpecifier *labelSpecifier = [VSTextLabelSpecifier new];
-	
+
 	NSDictionary *fontDictionary = [self dictionaryFromObject:dictionary[@"font"]];
-	labelSpecifier.font = [self vs_fontFromDictionary:fontDictionary sizeAdjustment:sizeAdjustment];
-	
+	labelSpecifier.font = [self vs_fontFromDictionary:fontDictionary keyPath:[keyPath stringByAppendingString:@".font"] sizeAdjustment:sizeAdjustment];
+
 	NSDictionary *boldFontDictionary = [self dictionaryFromObject:dictionary[@"boldFont"]];
 	if (boldFontDictionary) {
-		labelSpecifier.boldFont = [self vs_fontFromDictionary:boldFontDictionary sizeAdjustment:sizeAdjustment];
+		labelSpecifier.boldFont = [self vs_fontFromDictionary:boldFontDictionary keyPath:[keyPath stringByAppendingString:@".boldFont"] sizeAdjustment:sizeAdjustment];
 	}
-	
+
 	NSDictionary *italicFontDictionary = [self dictionaryFromObject:dictionary[@"italicFont"]];
 	if (italicFontDictionary) {
-		labelSpecifier.italicFont = [self vs_fontFromDictionary:italicFontDictionary sizeAdjustment:sizeAdjustment];
+		labelSpecifier.italicFont = [self vs_fontFromDictionary:italicFontDictionary keyPath:[keyPath stringByAppendingString:@".italicFont"] sizeAdjustment:sizeAdjustment];
 	}
 	
 	NSDictionary *sizeDictionary = [self dictionaryFromObject:dictionary[@"size"]];

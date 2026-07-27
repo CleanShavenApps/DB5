@@ -46,6 +46,18 @@ typedef NS_ENUM(NSUInteger, VSTextCaseTransform) {
 /** Dictionary with name key containing the fully specified name fo the font, and size key containing size of the font in points. Optionally make adjustment to the size of the font by providing a positive or negative value in sizeAdjustment */
 - (UIFont *)fontForKey:(NSString *)key sizeAdjustment:(CGFloat)sizeAdjustment;
 
+/** When set, consulted for every font the theme builds from a font dictionary — via
+ \c fontForKey:, a text-label specifier's font/boldFont/italicFont, or a navigation-bar
+ specifier's title and buttons labels. Receives the full key path of the font dictionary
+ (e.g. \c reminderSection.titleLabel.font ) together with the name and size that dictionary
+ specifies, and returns the finished font — or nil to fall back to the default behaviour
+ (name + size + the caller's \c sizeAdjustment ).
+
+ The caches do not observe this property: whatever state the resolver reads, the owner must
+ clear the font, text-label and navigation-bar specifier caches whenever that state changes,
+ exactly as it already must for a changed \c sizeAdjustment. */
+@property (nonatomic, copy) UIFont *(^fontResolver)(NSString *keyPath, NSString *fontName, CGFloat fontSize);
+
 /** Dictionary with x and y keys */
 - (CGPoint)pointForKey:(NSString *)key;
 
